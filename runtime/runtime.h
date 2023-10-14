@@ -107,17 +107,26 @@ char *etostr(elem *e);
 // prints the whole stack
 void sdump(stack *s);
 
-// adds the top two elements on the stack
-void add(stack *s);
-
-// subtracts the top two elements on the stack
-void sub(stack *s);
-
 // take the first n elements from an array
 void take(stack *s);
 
 // drop the first n elements from an array
 void drop(stack *s);
+
+// rotates an array by n elements
+void rot(stack *s);
+
+// reverses an array
+void rev(stack *s);
+
+// deshapes an array (makes the array one-dimensional)
+void deshape(stack *s);
+
+// adds the top two elements on the stack
+void add(stack *s);
+
+// subtracts the top two elements on the stack
+void sub(stack *s);
 
 // divides the top two elements on the stack
 void div_op(stack *s);

@@ -176,3 +176,98 @@ void drop(stack *s) {
     push(s, a);
     free_elem(n);
 }
+
+// rotates an array by n elements (↻)
+void rot(stack *s) {
+    elem *n = pop(s);
+    if (n->type != NUMBER || round(n->data.number) != n->data.number) {
+        rerror("The first argument to rot needs to be an integer!");
+    }
+    size_t n_int = (size_t) n->data.number;
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The second argument to rot needs to be an array!");
+    }
+    arr array = a->data.array;
+    arr new_array;
+    new_array.len = array.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < new_array.len; i++) {
+        new_array.data[i] = array.data[(i + n_int) % array.len];
+    }
+    free(array.data);
+    a->data.array = new_array;
+    push(s, a);
+    free_elem(n);
+}
+
+// reverses an array (⇌)
+void rev(stack *s) {
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The argument to rev needs to be an array!");
+    }
+    arr array = a->data.array;
+    arr new_array;
+    new_array.len = array.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < new_array.len; i++) {
+        new_array.data[i] = array.data[array.len - i - 1];
+    }
+    free(array.data);
+    a->data.array = new_array;
+    push(s, a);
+}
+
+// deshapes an array (makes the array one-dimensional)
+// array can be of any shape (depth)
+// recursively flattens the array
+static arr deshape_rec(arr a) {
+    arr new_array;
+    new_array.len = 0;
+    new_array.data = malloc(0);
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < a.len; i++) {
+        if (a.data[i]->type == ARRAY) {
+            arr sub_array = deshape_rec(a.data[i]->data.array);
+            new_array.len += sub_array.len;
+            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
+            if (new_array.data == NULL) {
+                rerror("Out of memory!");
+            }
+            for (size_t j = 0; j < sub_array.len; j++) {
+                new_array.data[new_array.len - sub_array.len + j] = sub_array.data[j];
+            }
+            free(sub_array.data);
+        } else {
+            new_array.len++;
+            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
+            if (new_array.data == NULL) {
+                rerror("Out of memory!");
+            }
+            new_array.data[new_array.len - 1] = a.data[i];
+        }
+    }
+    free(a.data);
+    return new_array;
+}
+
+// uses deshape_rec
+void deshape(stack *s) {
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The argument to deshape needs to be an array!");
+    }
+    arr array = a->data.array;
+    arr new_array = deshape_rec(array);
+    a->data.array = new_array;
+    push(s, a);
+}
