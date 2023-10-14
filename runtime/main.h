@@ -29,7 +29,8 @@ typedef enum {
     NUMBER,
     ARRAY,
     FUNPTR,
-    TYPE
+    TYPE,
+    BOXED
 } elem_type;
 
 char *type_to_str(elem_type type);
@@ -40,6 +41,7 @@ struct elem {
         arr array;
         funptr ptr;
         elem_type type;
+        elem *boxed;
     } data;
     elem_type type;
 };

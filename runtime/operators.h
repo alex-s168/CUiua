@@ -94,4 +94,10 @@ void div_op(stack *s);
 // multiplies the top two elements on the stack
 void mul(stack *s);
 
+// boxes the top element on the stack
+void box(stack *s);
+
+// unboxes the top element on the stack
+void unbox(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

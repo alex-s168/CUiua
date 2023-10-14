@@ -31,11 +31,16 @@ void free_elem(elem *e) {
         }
         free(e->data.array.data);
     }
+    if (e->type == BOXED) {
+        free_elem(e->data.boxed);
+    }
     free(e);
 }
 
 char *type_to_str(elem_type type) {
     switch (type) {
+        case BOXED:
+            return "boxed";
         case NUMBER:
             return "number";
         case ARRAY:
@@ -51,8 +56,18 @@ char *type_to_str(elem_type type) {
 
 char *etostr(elem *e) {
     switch (e->type) {
+        case BOXED: {
+            char *str = malloc(30);
+            if (str == NULL) {
+                rerror("Out of memory!");
+            }
+            sprintf(str, "box(%s)", etostr(e->data.boxed));
+            return str;
+        }
         case TYPE: {
             switch (e->data.type) {
+                case BOXED:
+                    return "type(boxed)";
                 case NUMBER:
                     return "type(number)";
                 case ARRAY:
@@ -129,6 +144,8 @@ bool elems_equal(elem *a, elem *b) {
         return false;
     }
     switch (a->type) {
+        case BOXED:
+            return elems_equal(a->data.boxed, b->data.boxed);
         case TYPE:
             return a->data.type == b->data.type;
         case NUMBER:
@@ -154,6 +171,9 @@ bool elems_equal(elem *a, elem *b) {
 elem *eclone(elem *e) {
     elem *clone = new_elem(e->type);
     switch (e->type) {
+        case BOXED:
+            clone->data.boxed = eclone(e->data.boxed);
+            break;
         case NUMBER:
             clone->data.number = e->data.number;
             break;

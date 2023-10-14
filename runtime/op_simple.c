@@ -125,3 +125,22 @@ void call(stack *s) {
     }
     e->data.ptr(s);
 }
+
+// boxes the top element on the stack
+void box(stack *s) {
+    elem *e = peek(s);
+    e->data.boxed = eclone(e);
+    e->type = BOXED;
+}
+
+// unboxes the top element on the stack
+void unbox(stack *s) {
+    elem *e = peek(s);
+    if (e->type != BOXED) {
+        rerror("Expected boxed value, got %s!", type_to_str(e->type));
+    }
+    elem *unboxed = e->data.boxed;
+    e->type = unboxed->type;
+    e->data = unboxed->data;
+    free(unboxed);
+}

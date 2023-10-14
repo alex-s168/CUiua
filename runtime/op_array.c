@@ -292,7 +292,7 @@ void indexof(stack *s) {
         rerror("The first argument to indexof needs to be an array!");
     }
     arr array = a->data.array;
-    if (b->type == NUMBER || b-> type == TYPE) {
+    if (b->type == NUMBER || b-> type == TYPE || b->type == BOXED) {
         int index = index_of_elem_in_arr(b, array);
         free_elem(a);
         free_elem(b);
@@ -336,7 +336,7 @@ void member(stack *s) {
         rerror("The first argument to member needs to be an array!");
     }
     arr array = a->data.array;
-    if (b->type == NUMBER || b->type == TYPE) {
+    if (b->type == NUMBER || b->type == TYPE || b->type == BOXED) {
         int index = index_of_elem_in_arr(b, array);
         free_elem(a);
         free_elem(b);
