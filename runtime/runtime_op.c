@@ -309,6 +309,10 @@ void join(stack *s) {
     arr a_arr = a->data.array;
     arr b_arr = b->data.array;
 
+    if (a_arr.len == 0 && b_arr.len == 0) {
+        return;
+    }
+
     a_arr.data = realloc(a_arr.data, (a_arr.len + b_arr.len) * sizeof(elem *));
     if (a_arr.data == NULL) {
         rerror("Out of memory!");

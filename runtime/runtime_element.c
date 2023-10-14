@@ -67,30 +67,33 @@ char *etostr(elem *e) {
             return str;
         }
         case ARRAY: {
-            size_t aloccs = 20;
-            char *str = malloc(aloccs);
+            // first, calculate the length of the string
+            size_t len = 2; // [[
+            for (size_t i = 0; i < e->data.array.len; i++) {
+                len += strlen(etostr(e->data.array.data[i]));
+                len += 1; // space
+            }
+            if (e->data.array.len > 0) {
+                len--; // no space after last element
+            }
+            len += 2; // ]]
+
+            // allocate the string
+            char *str = malloc(len);
             if (str == NULL) {
                 rerror("Out of memory!");
             }
-            str[0] = '[';
-            size_t pos = 1;
+
+            // copy the string
+            strcpy(str, "[");
             for (size_t i = 0; i < e->data.array.len; i++) {
-                char *tmp = etostr(e->data.array.data[i]);
-                size_t len = strlen(tmp);
-                if (pos + len + 1 >= aloccs) {
-                    aloccs = pos + len + 1;
-                    str = realloc(str, aloccs);
-                    if (str == NULL) {
-                        rerror("Out of memory!");
-                    }
+                strcat(str, etostr(e->data.array.data[i]));
+                if (i < e->data.array.len - 1) {
+                    strcat(str, " ");
                 }
-                strcpy(str + pos, tmp);
-                pos += len;
-                str[pos++] = ',';
-                free(tmp);
             }
-            str[pos - 1] = ']';
-            str[pos] = '\0';
+            strcat(str, "]");
+
             return str;
         }
         case FUNPTR: {
