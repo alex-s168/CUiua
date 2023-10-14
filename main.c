@@ -38,9 +38,129 @@ bool UC_UC_MA;
     if (UC_UC_MA) { i += strlen(b) - 1; }\
     if (UC_UC_MA)
 
+char **declared;
+size_t declared_len;
+size_t declared_alloc_s;
+
+void add_declared(char *name) {
+    // checks if all characters are alphanumeric
+    for (size_t i = 0; i < strlen(name); i++) {
+        if (!isalnum(name[i])) {
+            ERR("Function names must be alphanumeric!");
+        }
+    }
+
+    if (declared_len >= declared_alloc_s) {
+        declared_alloc_s *= 2;
+        char **new = realloc(declared, declared_alloc_s * sizeof(char *));
+        if (new == NULL) {
+            ERR("Out of memory!");
+        }
+        declared = new;
+    }
+    declared[declared_len++] = name;
+}
+
+// returns the end position of the name or -1 if not found. only checks until the next non-alphanumeric character in the given name.
+int is_declared(char *name) {
+    for (size_t i = 0; i < declared_len; i++) {
+        char *decl = declared[i];
+        size_t j = 0;
+        size_t ml = strlen(decl);
+        bool match = true;
+        for (j = 0; j < ml; j++) {
+            if (j >= strlen(name)) {
+                match = false;
+                break;
+            }
+            if (!isalnum(name[j])) {
+                break;
+            }
+            if (decl[j] != name[j]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            return j;
+        }
+    }
+    return -1;
+}
+
 void compile(char *code, size_t len, FILE *main, FILE *top) {
     for (size_t i = 0; i < len; i++) {
         char *curr = code + i;
+        UC(curr, "⟼") { // named function declaration
+            // example:   ⟼TestFunc (1 2 +)
+            // becomes:   void f_TestFunc() { push_number(&s, 1); push_number(&s, 2); add(&s); }
+
+            // find function name
+            size_t j = i + 1;
+            while (j < len && code[j] != ' ') {
+                j++;
+            }
+            if (j == len) {
+                ERR("Expected function name!");
+            }
+            char *name = malloc(j - i + 1);
+            if (name == NULL) {
+                ERR("Out of memory!");
+            }
+            strncpy(name, code + i + 1, j - i - 1);
+            name[j - i] = '\0';
+            if (is_declared(name) != -1) {
+                ERR("Function already declared!");
+            }
+            add_declared(name);
+            i = j;
+
+            // find function body
+            // 1. find opening parenthesis
+            while (i < len && code[i] != '(') {
+                i++;
+            }
+            if (i == len) {
+                ERR("Expected function body!");
+            }
+            i++;
+
+            // 2. find closing parenthesis
+            size_t indent = 0;
+            j = i;
+            while (j < len && (code[j] != ')' || indent > 0)) {
+                if (code[j] == '(') {
+                    indent++;
+                } else if (code[j] == ')') {
+                    indent--;
+                }
+                j++;
+            }
+            if (j == len) {
+                ERR("Unmatched parenthesis!");
+            }
+            char *body = malloc(j - i + 1);
+            if (body == NULL) {
+                ERR("Out of memory!");
+            }
+            strncpy(body, code + i, j - i);
+            body[j - i] = '\0';
+
+            // 3. compile function body
+            FILE *f = tmpfile();
+            compile(body, j - i, f, top);
+            i = j;
+            fprintf(top, "void f_%s() {\n", name);
+            rewind(f);
+            int c;
+            while ((c = getc(f)) != EOF) {
+                putc(c, top);
+            }
+            fclose(f);
+            fprintf(top, "}\n");
+            free(body);
+            continue;
+        }
         UC(curr, "∵") {
             fprintf(main, "  each(&s);\n");
             continue;
@@ -179,6 +299,12 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                     i = j - 1;
                     break;
                 }
+                int decl = is_declared(code + i);
+                if (decl != -1) {
+                    fprintf(main, "  push_addr(&s, f_%.*s);\n", decl, code + i);
+                    i += decl - 1;
+                    break;
+                }
                 fprintf(stderr, "Unknown character: %c with code %i\n", code[i], code[i]);
             }
         }
@@ -208,6 +334,13 @@ int main() {
         code[pos++] = (char) c;
     }
 
+    declared_alloc_s = 10;
+    declared = malloc(declared_alloc_s);
+    if (declared == NULL) {
+        ERR("Out of memory!");
+    }
+    declared_len = 0;
+
     FILE *topf = tmpfile();
     FILE *bottomf = tmpfile();
 
@@ -232,5 +365,6 @@ int main() {
     fclose(bottomf);
 
     free(code);
+    free(declared);
     return 0;
 }
