@@ -652,3 +652,123 @@ void type(stack *s) {
     e2->data.type = e->type;
     push(s, e2);
 }
+
+// puts the length of the top element (array) on the stack
+void len(stack *s) {
+    elem *e = pop(s);
+    size_t len = 1;
+    if (e->type == ARRAY) {
+        len = e->data.array.len;
+    }
+    elem *e2 = new_elem(NUMBER);
+    e2->data.number = len;
+    push(s, e2);
+}
+
+// gets the first element of an array
+void first(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("The argument to first needs to be an array!");
+    }
+    arr array = e->data.array;
+    if (array.len == 0) {
+        rerror("Cannot get first element of empty array!");
+    }
+    elem *e2 = array.data[0];
+    free(array.data);
+    e->data.array = array;
+    push(s, e2);
+}
+
+// makes an array of all natural numbers from 0 to n
+void range(stack *s) {
+    elem *e = pop(s);
+    if (e->type != NUMBER || round(e->data.number) != e->data.number || e->data.number < 0) {
+        rerror("The argument to range needs to be a positive integer!");
+    }
+    size_t n = (size_t) e->data.number;
+    arr array;
+    array.len = n;
+    array.data = malloc(array.len * sizeof(elem *));
+    if (array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < array.len; i++) {
+        elem *e2 = new_elem(NUMBER);
+        e2->data.number = i;
+        array.data[i] = e2;
+    }
+    free_elem(e);
+    elem *e2 = new_elem(ARRAY);
+    e2->data.array = array;
+    push(s, e2);
+}
+
+// get indecies where array values are not equal to zero
+void where(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("The argument to where needs to be an array!");
+    }
+    arr array = e->data.array;
+    arr indecies;
+    indecies.len = 0;
+    indecies.data = malloc(0);
+    if (indecies.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < array.len; i++) {
+        if (array.data[i]->type != NUMBER) {
+            rerror("The array needs to be a array of numbers!");
+        }
+        if (array.data[i]->data.number != 0) {
+            indecies.len++;
+            indecies.data = realloc(indecies.data, indecies.len * sizeof(elem *));
+            if (indecies.data == NULL) {
+                rerror("Out of memory!");
+            }
+            elem *ine = new_elem(NUMBER);
+            ine->data.number = i;
+            indecies.data[indecies.len - 1] = ine;
+        }
+    }
+    free(array.data);
+    e->data.array = indecies;
+    push(s, e);
+}
+
+// remove all duplicate elements from an array
+void deduplicate(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("The argument to deduplicate needs to be an array!");
+    }
+    arr array = e->data.array;
+    arr new_array;
+    new_array.len = 0;
+    new_array.data = malloc(0);
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < array.len; i++) {
+        bool found = false;
+        for (size_t j = 0; j < new_array.len; j++) {
+            if (elems_equal(array.data[i], new_array.data[j])) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            new_array.len++;
+            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
+            if (new_array.data == NULL) {
+                rerror("Out of memory!");
+            }
+            new_array.data[new_array.len - 1] = array.data[i];
+        }
+    }
+    free(array.data);
+    e->data.array = new_array;
+    push(s, e);
+}

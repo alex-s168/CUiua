@@ -169,6 +169,21 @@ void each(stack *s);
 // puts the type of the top element on the stack
 void type(stack *s);
 
+// puts the length of the top element (array) on the stack
+void len(stack *s);
+
+// gets the first element of an array
+void first(stack *s);
+
+// make an array of all natural numbers from 0 to n
+void range(stack *s);
+
+// get indecies where array values are not equal to zero
+void where(stack *s);
+
+// remove all duplicate elements from an array
+void deduplicate(stack *s);
+
 // adds the top two elements on the stack
 void add(stack *s);
 

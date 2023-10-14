@@ -245,6 +245,26 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  type(s);\n");
             continue;
         }
+        UC(curr, "⧻") {
+            fprintf(main, "  len(s);\n");
+            continue;
+        }
+        UC(curr, "⊢") {
+            fprintf(main, "  first(s);\n");
+            continue;
+        }
+        UC(curr, "⇡") {
+            fprintf(main, "  range(s);\n");
+            continue;
+        }
+        UC(curr, "⊚") {
+            fprintf(main, "  where(s);\n");
+            continue;
+        }
+        UC(curr, "⊝") {
+            fprintf(main, "  deduplicate(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {
