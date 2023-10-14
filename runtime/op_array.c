@@ -661,3 +661,97 @@ void deduplicate(stack *s) {
     e->data.array = new_array;
     push(s, e);
 }
+
+// enumerates an array
+void enumerate(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(e->type));
+    }
+    arr array = e->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array.len; i++) {
+        new_array(s);
+        push_number(s, i);
+        push(s, eclone(array.data[i]));
+        end_array(s);
+    }
+    end_array(s);
+
+    free_elem(e);
+}
+
+// returns the indecies to the array as if it was sorted ascending
+void sort_asc(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(e->type));
+    }
+    arr array = e->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array.len; i++) {
+        push_number(s, i);
+    }
+    end_array(s);
+
+    // sort the indecies
+    elem *f = pop(s);
+    if (f->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(f->type));
+    }
+    arr indecies = f->data.array;
+
+    for (size_t i = 0; i < indecies.len; i++) {
+        for (size_t j = 0; j < indecies.len - i - 1; j++) {
+            if (array.data[(size_t) indecies.data[j]->data.number]->type != NUMBER || array.data[(size_t) indecies.data[j + 1]->data.number]->type != NUMBER) {
+                rerror("Expected array of numbers!");
+            }
+            if (array.data[(size_t) indecies.data[j]->data.number]->data.number > array.data[(size_t) indecies.data[j + 1]->data.number]->data.number) {
+                elem *tmp = indecies.data[j];
+                indecies.data[j] = indecies.data[j + 1];
+                indecies.data[j + 1] = tmp;
+            }
+        }
+    }
+
+    push(s, f);
+}
+
+// returns the indecies to the array as if it was sorted descending
+void sort_desc(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(e->type));
+    }
+    arr array = e->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array.len; i++) {
+        push_number(s, i);
+    }
+    end_array(s);
+
+    // sort the indecies
+    elem *f = pop(s);
+    if (f->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(f->type));
+    }
+    arr indecies = f->data.array;
+
+    for (size_t i = 0; i < indecies.len; i++) {
+        for (size_t j = 0; j < indecies.len - i - 1; j++) {
+            if (array.data[(size_t) indecies.data[j]->data.number]->type != NUMBER || array.data[(size_t) indecies.data[j + 1]->data.number]->type != NUMBER) {
+                rerror("Expected array of numbers!");
+            }
+            if (array.data[(size_t) indecies.data[j]->data.number]->data.number < array.data[(size_t) indecies.data[j + 1]->data.number]->data.number) {
+                elem *tmp = indecies.data[j];
+                indecies.data[j] = indecies.data[j + 1];
+                indecies.data[j + 1] = tmp;
+            }
+        }
+    }
+
+    push(s, f);
+}

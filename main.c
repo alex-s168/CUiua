@@ -273,6 +273,19 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  box(s);\n");
             continue;
         }
+        UC(curr, "⋯") {
+            fprintf(main, "  enumerate(s);\n");
+            continue;
+        }
+        // TODO: transpose (⍉)
+        UC(curr, "⍏") {
+            fprintf(main, "  sort_asc(s);\n");
+            continue;
+        }
+        UC(curr, "⍖") {
+            fprintf(main, "  sort_desc(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {

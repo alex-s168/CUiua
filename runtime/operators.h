@@ -100,4 +100,13 @@ void box(stack *s);
 // unboxes the top element on the stack
 void unbox(stack *s);
 
+// enumerates an array
+void enumerate(stack *s);
+
+// returns the indecies to the array as if it was sorted ascending
+void sort_asc(stack *s);
+
+// returns the indecies to the array as if it was sorted descending
+void sort_desc(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
