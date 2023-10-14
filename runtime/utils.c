@@ -3,7 +3,7 @@
 //
 
 #include "utils.h"
-#include "runtime.h"
+#include "main.h"
 
 #ifdef NOSTD
 #include "std.h"

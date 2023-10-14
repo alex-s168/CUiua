@@ -2,7 +2,7 @@
 // Created by alex on 10/14/23.
 //
 
-#include "runtime.h"
+#include "main.h"
 
 #ifdef NOSTD
 #include "std.h"

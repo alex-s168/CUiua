@@ -392,7 +392,7 @@ int main() {
     FILE *topf = tmpfile();
     FILE *bottomf = tmpfile();
 
-    printf("#include \"runtime.h\"\n\n");
+    printf("#include \"runtime/main.h\"\n#include \"runtime/operators.h\"\n\n");
     compile(code, pos, bottomf, topf);
 
     rewind(topf);
