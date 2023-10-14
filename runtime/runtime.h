@@ -122,6 +122,18 @@ void rev(stack *s);
 // deshapes an array (makes the array one-dimensional)
 void deshape(stack *s);
 
+// checks if two arrays are the same
+void match(stack *s);
+
+// joins two arrays end-to-end
+void join(stack *s);
+
+// select elements from an array
+// (the first element on the stack is a array of indecies)
+// (the second element on the stack is the array to select from)
+// (the result is pushed onto the stack)
+void select_op(stack *s);
+
 // adds the top two elements on the stack
 void add(stack *s);
 

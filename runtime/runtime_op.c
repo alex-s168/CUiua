@@ -271,3 +271,105 @@ void deshape(stack *s) {
     a->data.array = new_array;
     push(s, a);
 }
+
+// checks if two arrays are the same
+static bool match_rec(arr a, arr b) {
+    if (a.len != b.len) {
+        return false;
+    }
+    for (size_t i = 0; i < a.len; i++) {
+        if (a.data[i]->type == ARRAY && b.data[i]->type == ARRAY) {
+            if (!match_rec(a.data[i]->data.array, b.data[i]->data.array)) {
+                return false;
+            }
+        } else if (a.data[i]->type != b.data[i]->type) {
+            return false;
+        } else if (a.data[i]->type == NUMBER && a.data[i]->data.number != b.data[i]->data.number) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// checks if two arrays are the same
+// pushes 1 if true, 0 if false
+// uses match_rec
+void match(stack *s) {
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("The second argument to match needs to be an array!");
+    }
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to match needs to be an array!");
+    }
+    bool match = match_rec(a->data.array, b->data.array);
+    free_elem(a);
+    free_elem(b);
+    elem *e = new_elem(NUMBER);
+    e->data.number = match ? 1 : 0;
+    push(s, e);
+}
+
+// joins two arrays end-to-end
+void join(stack *s) {
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("The second argument to join needs to be an array!");
+    }
+    elem *a = peek(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to join needs to be an array!");
+    }
+
+    arr a_arr = a->data.array;
+    arr b_arr = b->data.array;
+
+    a_arr.data = realloc(a_arr.data, (a_arr.len + b_arr.len) * sizeof(elem *));
+    if (a_arr.data == NULL) {
+        rerror("Out of memory!");
+    }
+
+    for (size_t i = 0; i < b_arr.len; i++) {
+        a_arr.data[a_arr.len + i] = b_arr.data[i];
+    }
+    a_arr.len += b_arr.len;
+    a->data.array = a_arr;
+}
+
+// select elements from an array
+// (the first element on the stack is a array of indecies)
+// (the second element on the stack is the array to select from)
+// (the result is pushed onto the stack)
+void select_op(stack *s) {
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("The second argument to select needs to be an array!");
+    }
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to select needs to be an array!");
+    }
+    arr array = a->data.array;
+    arr indecies = b->data.array;
+    arr new_array;
+    new_array.len = indecies.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < indecies.len; i++) {
+        if (indecies.data[i]->type != NUMBER || round(indecies.data[i]->data.number) != indecies.data[i]->data.number) {
+            rerror("The indecies need to be integers!");
+        }
+        size_t index = (size_t) indecies.data[i]->data.number;
+        if (index >= array.len) {
+            rerror("Index out of bounds!");
+        }
+        new_array.data[i] = array.data[index];
+    }
+    free(array.data);
+    a->data.array = new_array;
+    free_elem(b);
+    push(s, a);
+}

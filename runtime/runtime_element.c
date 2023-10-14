@@ -47,11 +47,20 @@ char *type_to_str(elem_type type) {
 char *etostr(elem *e) {
     switch (e->type) {
         case NUMBER: {
-            char *str = malloc(20);
+            char *str = malloc(30);
             if (str == NULL) {
                 rerror("Out of memory!");
             }
             sprintf(str, "%f", e->data.number);
+            // remove trailing zeros and dot (if possible)
+            size_t len = strlen(str);
+            while (len > 0 && str[len - 1] == '0') {
+                len--;
+            }
+            if (len > 0 && str[len - 1] == '.') {
+                len--;
+            }
+            str[len] = '\0';
             return str;
         }
         case ARRAY: {
