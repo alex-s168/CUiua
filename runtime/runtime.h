@@ -134,6 +134,19 @@ void join(stack *s);
 // (the result is pushed onto the stack)
 void select_op(stack *s);
 
+// gets element from an array at a index
+void pick(stack *s);
+
+// indexof   [x] [arr]  ->  [index]
+// if x is a number, it returns the index of that number in the array (or -1 if it is not in the array)
+// if x is an array, it does the indexof operation for each element in the array and returns a array of the resulting indecies
+void indexof(stack *s);
+
+// member   [x] [arr]  ->  [index]
+// if x is a number, it returns true if that number is in the array
+// if x is an array, it does the member operation for each element in the array and returns a array of the resulting booleans
+void member(stack *s);
+
 // adds the top two elements on the stack
 void add(stack *s);
 
@@ -145,6 +158,8 @@ void div_op(stack *s);
 
 // multiplies the top two elements on the stack
 void mul(stack *s);
+
+bool elems_equal(elem *a, elem *b);
 
 /* the Each-operator
  * (applies a function to each element of an array)

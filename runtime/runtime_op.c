@@ -273,37 +273,12 @@ void deshape(stack *s) {
 }
 
 // checks if two arrays are the same
-static bool match_rec(arr a, arr b) {
-    if (a.len != b.len) {
-        return false;
-    }
-    for (size_t i = 0; i < a.len; i++) {
-        if (a.data[i]->type == ARRAY && b.data[i]->type == ARRAY) {
-            if (!match_rec(a.data[i]->data.array, b.data[i]->data.array)) {
-                return false;
-            }
-        } else if (a.data[i]->type != b.data[i]->type) {
-            return false;
-        } else if (a.data[i]->type == NUMBER && a.data[i]->data.number != b.data[i]->data.number) {
-            return false;
-        }
-    }
-    return true;
-}
-
-// checks if two arrays are the same
 // pushes 1 if true, 0 if false
 // uses match_rec
 void match(stack *s) {
     elem *b = pop(s);
-    if (b->type != ARRAY) {
-        rerror("The second argument to match needs to be an array!");
-    }
     elem *a = pop(s);
-    if (a->type != ARRAY) {
-        rerror("The first argument to match needs to be an array!");
-    }
-    bool match = match_rec(a->data.array, b->data.array);
+    bool match = elems_equal(a, b);
     free_elem(a);
     free_elem(b);
     elem *e = new_elem(NUMBER);
@@ -372,4 +347,122 @@ void select_op(stack *s) {
     a->data.array = new_array;
     free_elem(b);
     push(s, a);
+}
+
+// gets element from an array at a index
+void pick(stack *s) {
+    elem *b = pop(s);
+    if (b->type != NUMBER || round(b->data.number) != b->data.number) {
+        rerror("The second argument to pick needs to be an integer!");
+    }
+    size_t index = (size_t) b->data.number;
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to pick needs to be an array!");
+    }
+    arr array = a->data.array;
+    if (index >= array.len) {
+        rerror("Index out of bounds!");
+    }
+    elem *e = array.data[index];
+    free(array.data);
+    a->data.array = array;
+    free_elem(b);
+    push(s, e);
+}
+
+static int index_of_elem_in_arr(elem *e, arr a) {
+    for (size_t i = 0; i < a.len; i++) {
+        if (elems_equal(e, a.data[i])) {
+            return (int) i;
+        }
+    }
+    return -1;
+}
+
+// indexof   [x] [arr]  ->  [index]
+// if x is a number, it returns the index of that number in the array (or -1 if it is not in the array)
+// if x is an array, it does the indexof operation for each element in the array and returns a array of the resulting indecies
+void indexof(stack *s) {
+    elem *b = pop(s);
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to indexof needs to be an array!");
+    }
+    arr array = a->data.array;
+    if (b->type == NUMBER) {
+        int index = index_of_elem_in_arr(b, array);
+        free_elem(a);
+        free_elem(b);
+        elem *e = new_elem(NUMBER);
+        e->data.number = index;
+        push(s, e);
+    } else if (b->type == ARRAY) {
+        arr indecies;
+        indecies.len = b->data.array.len;
+        indecies.data = malloc(indecies.len * sizeof(elem *));
+        if (indecies.data == NULL) {
+            rerror("Out of memory!");
+        }
+        for (size_t i = 0; i < indecies.len; i++) {
+            if (b->data.array.data[i]->type != NUMBER || round(b->data.array.data[i]->data.number) != b->data.array.data[i]->data.number) {
+                rerror("The indecies need to be integers!");
+            }
+            int index = index_of_elem_in_arr(b->data.array.data[i], array);
+            elem *e = new_elem(NUMBER);
+            e->data.number = index;
+            indecies.data[i] = e;
+        }
+        free_elem(a);
+        free_elem(b);
+        elem *e = new_elem(ARRAY);
+        e->data.array = indecies;
+        push(s, e);
+    } else {
+        rerror("The second argument to indexof needs to be a number or an array!");
+    }
+}
+
+// member   [x] [arr]  ->  [index]
+// if x is a number, it returns true if that number is in the array
+// if x is an array, it does the member operation for each element in the array and returns a array of the resulting booleans
+// uses index_of_elem_in_arr
+void member(stack *s) {
+    elem *b = pop(s);
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to member needs to be an array!");
+    }
+    arr array = a->data.array;
+    if (b->type == NUMBER) {
+        int index = index_of_elem_in_arr(b, array);
+        free_elem(a);
+        free_elem(b);
+        elem *e = new_elem(NUMBER);
+        e->data.number = index == -1 ? 0 : 1;
+        push(s, e);
+    } else if (b->type == ARRAY) {
+        arr indecies;
+        indecies.len = b->data.array.len;
+        indecies.data = malloc(indecies.len * sizeof(elem *));
+        if (indecies.data == NULL) {
+            rerror("Out of memory!");
+        }
+        for (size_t i = 0; i < indecies.len; i++) {
+            if (b->data.array.data[i]->type != NUMBER || round(b->data.array.data[i]->data.number) != b->data.array.data[i]->data.number) {
+                rerror("The indecies need to be integers!");
+            }
+            int index = index_of_elem_in_arr(b->data.array.data[i], array);
+            elem *e = new_elem(NUMBER);
+            e->data.number = index == -1 ? 0 : 1;
+            indecies.data[i] = e;
+        }
+        free_elem(a);
+        free_elem(b);
+        elem *e = new_elem(ARRAY);
+        e->data.array = indecies;
+        push(s, e);
+    } else {
+        rerror("The second argument to member needs to be a number or an array!");
+    }
 }

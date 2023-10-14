@@ -101,3 +101,27 @@ char *etostr(elem *e) {
         }
     }
 }
+
+bool elems_equal(elem *a, elem *b) {
+    if (a->type != b->type) {
+        return false;
+    }
+    switch (a->type) {
+        case NUMBER:
+            return a->data.number == b->data.number;
+        case ARRAY:
+            if (a->data.array.len != b->data.array.len) {
+                return false;
+            }
+            for (size_t i = 0; i < a->data.array.len; i++) {
+                if (!elems_equal(a->data.array.data[i], b->data.array.data[i])) {
+                    return false;
+                }
+            }
+            return true;
+        case FUNPTR:
+            return a->data.ptr == b->data.ptr;
+        default:
+            return false;
+    }
+}
