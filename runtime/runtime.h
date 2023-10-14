@@ -11,8 +11,11 @@
 // runtime error
 void rerror(char *fmt, ...);
 
+struct stack;
+typedef struct stack stack;
+
 // function pointer
-typedef void (*funptr)();
+typedef void (*funptr)(stack *);
 
 struct elem;
 typedef struct elem elem;
@@ -39,11 +42,11 @@ struct elem {
     elem_type type;
 };
 
-typedef struct {
+struct stack{
     elem **data;
     size_t nextpos;
     size_t alloc;
-} stack;
+};
 
 // initializes the runtime
 void initrt();

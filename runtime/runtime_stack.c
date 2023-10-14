@@ -58,7 +58,7 @@ void call(stack *s) {
     if (e->type != FUNPTR) {
         rerror("Expected function pointer, got %s!", type_to_str(e->type));
     }
-    e->data.ptr();
+    e->data.ptr(s);
 }
 
 void push_number(stack *s, double number) {

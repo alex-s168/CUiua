@@ -93,7 +93,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
         char *curr = code + i;
         UC(curr, "⟼") { // named function declaration
             // example:   ⟼TestFunc (1 2 +)
-            // becomes:   void f_TestFunc() { push_number(&s, 1); push_number(&s, 2); add(&s); }
+            // becomes:   void f_TestFunc() { push_number(s, 1); push_number(s, 2); add(s); }
 
             // find function name
             size_t j = i + 1;
@@ -150,7 +150,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             FILE *f = tmpfile();
             compile(body, j - i, f, top);
             i = j;
-            fprintf(top, "void f_%s() {\n", name);
+            fprintf(top, "void f_%s(stack *s) {\n", name);
             rewind(f);
             int c;
             while ((c = getc(f)) != EOF) {
@@ -162,59 +162,59 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             continue;
         }
         UC(curr, "∵") {
-            fprintf(main, "  each(&s);\n");
+            fprintf(main, "  each(s);\n");
             continue;
         }
         UC(curr, "×") {
-            fprintf(main, "  mul(&s);\n");
+            fprintf(main, "  mul(s);\n");
             continue;
         }
         UC(curr, "÷") {
-            fprintf(main, "  div(&s);\n");
+            fprintf(main, "  div(s);\n");
             continue;
         }
         UC(curr, "↙") {
-            fprintf(main, "  take(&s);\n");
+            fprintf(main, "  take(s);\n");
             continue;
         }
         UC(curr, "↘") {
-            fprintf(main, "  drop(&s);\n");
+            fprintf(main, "  drop(s);\n");
             continue;
         }
         UC(curr, "↻") {
-            fprintf(main, "  rot(&s);\n");
+            fprintf(main, "  rot(s);\n");
             continue;
         }
         UC(curr, "⇌") {
-            fprintf(main, "  rev(&s);\n");
+            fprintf(main, "  rev(s);\n");
             continue;
         }
         UC(curr, "♭") {
-            fprintf(main, "  deshape(&s);\n");
+            fprintf(main, "  deshape(s);\n");
             continue;
         }
         UC(curr, "≅") {
-            fprintf(main, "  match(&s);\n");
+            fprintf(main, "  match(s);\n");
             continue;
         }
         UC(curr, "⊂") {
-            fprintf(main, "  join(&s);\n");
+            fprintf(main, "  join(s);\n");
             continue;
         }
         UC(curr, "⊏") {
-            fprintf(main, "  select_op(&s);\n");
+            fprintf(main, "  select_op(s);\n");
             continue;
         }
         UC(curr, "⊡") {
-            fprintf(main, "  pick(&s);\n");
+            fprintf(main, "  pick(s);\n");
             continue;
         }
         UC(curr, "⊗") {
-            fprintf(main, "  indexof(&s);\n");
+            fprintf(main, "  indexof(s);\n");
             continue;
         }
         UC(curr, "∊") {
-            fprintf(main, "  member(&s);\n");
+            fprintf(main, "  member(s);\n");
             continue;
         }
         switch (code[i]) {
@@ -241,7 +241,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 int anon = rand();
                 FILE *f = tmpfile();
                 compile(code + i + 1, j - i - 1, f, top);
-                fprintf(top, "void f_%i() {\n", anon);
+                fprintf(top, "void f_%i(stack *s) {\n", anon);
                 rewind(f);
                 int c;
                 while ((c = getc(f)) != EOF) {
@@ -249,41 +249,41 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 }
                 fclose(f);
                 fprintf(top, "}\n");
-                fprintf(main, "  push_addr(&s, f_%i);\n", anon);
+                fprintf(main, "  push_addr(s, f_%i);\n", anon);
                 i = j;
                 break;
             }
             case '[': {
-                fprintf(main, "  new_array(&s);\n");
+                fprintf(main, "  new_array(s);\n");
                 break;
             }
             case ']': {
-                fprintf(main, "  end_array(&s);\n");
+                fprintf(main, "  end_array(s);\n");
                 break;
             }
             case '!': {
-                fprintf(main, "  call(&s);\n");
+                fprintf(main, "  call(s);\n");
                 break;
             }
             case ';': {
-                fprintf(main, "  pop(&s);\n");
+                fprintf(main, "  pop(s);\n");
                 break;
             }
             case '.': {
-                fprintf(main, "  dup(&s);\n");
+                fprintf(main, "  dup(s);\n");
                 break;
             }
             case ':':
-                fprintf(main, "  swap(&s);\n");
+                fprintf(main, "  swap(s);\n");
                 break;
             case ',':
-                fprintf(main, "  over(&s);\n");
+                fprintf(main, "  over(s);\n");
                 break;
             case '+':
-                fprintf(main, "  add(&s);\n");
+                fprintf(main, "  add(s);\n");
                 break;
             case '-':
-                fprintf(main, "  sub(&s);\n");
+                fprintf(main, "  sub(s);\n");
                 break;
             case ' ':
             case '\n' :
@@ -295,13 +295,13 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                     while (j < len && (isdigit(code[j]) || code[j] == '.')) {
                         j++;
                     }
-                    fprintf(main, "  push_number(&s, %.*s);\n", (int) (j - i), code + i);
+                    fprintf(main, "  push_number(s, %.*s);\n", (int) (j - i), code + i);
                     i = j - 1;
                     break;
                 }
                 int decl = is_declared(code + i);
                 if (decl != -1) {
-                    fprintf(main, "  push_addr(&s, f_%.*s);\n", decl, code + i);
+                    fprintf(main, "  push_addr(s, f_%.*s);\n", decl, code + i);
                     i += decl - 1;
                     break;
                 }
@@ -345,7 +345,6 @@ int main() {
     FILE *bottomf = tmpfile();
 
     printf("#include \"runtime.h\"\n\n");
-    printf("stack s;\n\n");
     compile(code, pos, bottomf, topf);
 
     rewind(topf);
@@ -355,11 +354,11 @@ int main() {
         putchar(c);
     }
 
-    printf("int main() {\n  initrt();\n  sinit(&s);\n\n");
+    printf("int main() {\n  stack st;\n  stack *s = &st;\n  initrt();\n  sinit(s);\n\n");
     while ((c = getc(bottomf)) != EOF) {
         putchar(c);
     }
-    printf("\n  sdump(&s);\n  sfree(&s);\n  stoprt();\n}\n");
+    printf("\n  sdump(s);\n  sfree(s);\n  stoprt();\n}\n");
 
     fclose(topf);
     fclose(bottomf);
