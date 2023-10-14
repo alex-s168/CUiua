@@ -113,6 +113,12 @@ void add(stack *s);
 // subtracts the top two elements on the stack
 void sub(stack *s);
 
+// take the first n elements from an array
+void take(stack *s);
+
+// drop the first n elements from an array
+void drop(stack *s);
+
 // divides the top two elements on the stack
 void div_op(stack *s);
 

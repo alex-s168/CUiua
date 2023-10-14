@@ -1,2 +1,2 @@
 # executes a transpiled cuiua program
-gcc out.c runtime/*.c -o out -I runtime
+gcc out.c runtime/*.c -o out -I runtime -lm

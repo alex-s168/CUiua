@@ -8,6 +8,7 @@
 #include "std.h"
 #else
 #include <stdlib.h>
+#include <math.h>
 #endif
 
 // TODO: after popping an element and not using it anymore, free it
@@ -66,7 +67,7 @@ static elem *add_elem(elem *a, elem *b) {
 
 static elem *sub_elem(elem *a, elem *b) {
     if (a->type != NUMBER || b->type != NUMBER) {
-        return op_on_all_elem(a, b, add_elem);
+        return op_on_all_elem(a, b, sub_elem);
     }
     elem *e = new_elem(NUMBER);
     e->data.number = a->data.number - b->data.number;
@@ -75,7 +76,7 @@ static elem *sub_elem(elem *a, elem *b) {
 
 static elem *div_elem(elem *a, elem *b) {
     if (a->type != NUMBER || b->type != NUMBER) {
-        return op_on_all_elem(a, b, add_elem);
+        return op_on_all_elem(a, b, div_elem);
     }
     elem *e = new_elem(NUMBER);
     e->data.number = a->data.number / b->data.number;
@@ -84,7 +85,7 @@ static elem *div_elem(elem *a, elem *b) {
 
 static elem *mul_elem(elem *a, elem *b) {
     if (a->type != NUMBER || b->type != NUMBER) {
-        return op_on_all_elem(a, b, add_elem);
+        return op_on_all_elem(a, b, mul_elem);
     }
     elem *e = new_elem(NUMBER);
     e->data.number = a->data.number * b->data.number;
@@ -113,4 +114,65 @@ void mul(stack *s) {
     elem *b = pop(s);
     elem *a = pop(s);
     push(s, mul_elem(a, b));
+}
+
+// ↙
+void take(stack *s) {
+    elem *n = pop(s);
+    if (n->type != NUMBER || round(n->data.number) != n->data.number || n->data.number < 0) {
+        rerror("The first argument to take needs to be a positive integer!");
+    }
+    size_t n_int = (size_t) n->data.number;
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The second argument to take needs to be an array!");
+    }
+    arr array = a->data.array;
+    if (n->data.number > array.len) {
+        rerror("Amount bigger than array length!");
+    }
+    arr new_array;
+    new_array.len = n_int;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < new_array.len; i++) {
+        new_array.data[i] = array.data[i];
+    }
+    free(array.data);
+    a->data.array = new_array;
+    push(s, a);
+    free_elem(n);
+}
+
+// ↘
+// removes the first n elements from an array
+void drop(stack *s) {
+    elem *n = pop(s);
+    if (n->type != NUMBER || round(n->data.number) != n->data.number || n->data.number < 0) {
+        rerror("The first argument to drop needs to be a positive integer!");
+    }
+    size_t n_int = (size_t) n->data.number;
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The second argument to drop needs to be an array!");
+    }
+    arr array = a->data.array;
+    if (n->data.number > array.len) {
+        rerror("Amount bigger than array length!");
+    }
+    arr new_array;
+    new_array.len = (size_t) (array.len - n_int);
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < new_array.len; i++) {
+        new_array.data[i] = array.data[i + n_int];
+    }
+    free(array.data);
+    a->data.array = new_array;
+    push(s, a);
+    free_elem(n);
 }
