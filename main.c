@@ -217,6 +217,26 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  member(s);\n");
             continue;
         }
+        UC(curr, "∘") {
+            fprintf(main, "  push_addr(s, f_spec_noop);\n");
+            continue;
+        }
+        UC(curr, "△") {
+            fprintf(main, "  shape(s);\n");
+            continue;
+        }
+        UC(curr, "⍥") {
+            fprintf(main, "  repeat(s);\n");
+            continue;
+        }
+        UC(curr, "∵") {
+            fprintf(main, "  each(s);\n");
+            continue;
+        }
+        UC(curr, "↯") {
+            fprintf(main, "  reshape(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {
@@ -354,6 +374,7 @@ int main() {
         putchar(c);
     }
 
+    printf("void f_spec_noop(stack *s) {\n  return;\n}\n\n");
     printf("int main() {\n  stack st;\n  stack *s = &st;\n  initrt();\n  sinit(s);\n\n");
     while ((c = getc(bottomf)) != EOF) {
         putchar(c);

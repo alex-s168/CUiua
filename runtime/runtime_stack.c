@@ -53,14 +53,6 @@ elem *pop(stack *s) {
     return s->data[--s->nextpos];
 }
 
-void call(stack *s) {
-    elem *e = pop(s);
-    if (e->type != FUNPTR) {
-        rerror("Expected function pointer, got %s!", type_to_str(e->type));
-    }
-    e->data.ptr(s);
-}
-
 void push_number(stack *s, double number) {
     elem *e = new_elem(NUMBER);
     e->data.number = number;
@@ -87,7 +79,7 @@ elem *peek(stack *s) {
 }
 
 void dup(stack *s) {
-    push(s, peek(s));
+    push(s, eclone(peek(s)));
 }
 
 void swap(stack *s) {
@@ -102,7 +94,7 @@ void over(stack *s) {
     elem *b = pop(s);
     push(s, b);
     push(s, a);
-    push(s, b);
+    push(s, eclone(b));
 }
 
 bool has_next(stack *s) {

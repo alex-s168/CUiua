@@ -3,6 +3,7 @@
 //
 
 #include "runtime.h"
+#include "utils.h"
 
 #ifdef NOSTD
 #include "std.h"
@@ -114,6 +115,14 @@ void mul(stack *s) {
     elem *b = pop(s);
     elem *a = pop(s);
     push(s, mul_elem(a, b));
+}
+
+void call(stack *s) {
+    elem *e = pop(s);
+    if (e->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(e->type));
+    }
+    e->data.ptr(s);
 }
 
 // ↙
@@ -465,4 +474,169 @@ void member(stack *s) {
     } else {
         rerror("The second argument to member needs to be a number or an array!");
     }
+}
+
+static iarr shape_rec(arr a) {
+    iarr shape;
+    iarr_init(&shape, 1);
+    shape.data[0] = a.len;
+
+    if (a.len == 0) {
+        return shape;
+    }
+    elem_type type = a.data[0]->type;
+    for (size_t i = 1; i < a.len; i++) {
+        if (a.data[i]->type != type) {
+            rerror("Cannot get shape of array with different types!");
+        }
+    }
+    if (type == ARRAY) {
+        iarr sub_shape = shape_rec(a.data[0]->data.array);
+        // check if shape is consistent
+        for (size_t i = 0; i < a.len; i++) {
+            iarr sub_shape2 = shape_rec(a.data[i]->data.array);
+            if (sub_shape.len != sub_shape2.len) {
+                rerror("Cannot get shape of array with inconsistent shape!");
+            }
+            for (size_t j = 0; j < sub_shape.len; j++) {
+                if (sub_shape.data[j] != sub_shape2.data[j]) {
+                    rerror("Cannot get shape of array with inconsistent shape!");
+                }
+            }
+            free(sub_shape2.data);
+        }
+        shape = iarr_join(shape, sub_shape);
+        free(sub_shape.data);
+    }
+    return shape;
+}
+
+// returns the shape of an array
+// uses shape_rec
+void shape(stack *s) {
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The argument to shape needs to be an array!");
+    }
+    arr array = a->data.array;
+    iarr shape = shape_rec(array);
+    arr new_array;
+    new_array.len = shape.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < shape.len; i++) {
+        elem *e = new_elem(NUMBER);
+        e->data.number = shape.data[i];
+        new_array.data[i] = e;
+    }
+    free(shape.data);
+    free(array.data);
+    a->data.array = new_array;
+    push(s, a);
+}
+
+// repeats the given function n times
+void repeat(stack *s) {
+    elem *n = pop(s);
+    if (n->type != NUMBER || round(n->data.number) != n->data.number || n->data.number < 0) {
+        rerror("The first argument to repeat needs to be a positive integer!");
+    }
+    size_t n_int = (size_t) n->data.number;
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("The second argument to repeat needs to be a function pointer!");
+    }
+    for (size_t i = 0; i < n_int; i++) {
+        f->data.ptr(s);
+    }
+    free_elem(n);
+    free_elem(f);
+}
+
+// executes the given function for each element in an array and returns a array of the results
+void each(stack *s) {
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("The first argument to each needs to be a function pointer!");
+    }
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The second argument to each needs to be an array!");
+    }
+    arr array = a->data.array;
+    arr new_array;
+    new_array.len = array.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < array.len; i++) {
+        push(s, array.data[i]);
+        f->data.ptr(s);
+        new_array.data[i] = pop(s);
+    }
+    free(array.data);
+    a->data.array = new_array;
+    free_elem(f);
+    push(s, a);
+}
+
+int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
+    if (shape.len == 0) {
+        return 0;
+    }
+    if (shape.len == 1) {
+        if (shape.data[0] > orig->len + index) {
+            rerror("Cannot reshape array to a bigger size!");
+        }
+        new_array(s);
+        size_t i;
+        for (i = 0; i < shape.data[0]; i++) {
+            elem *e = orig->data[index + i];
+            push(s, e);
+        }
+        end_array(s);
+        return i;
+    }
+    new_array(s);
+    size_t used = 0;
+    for (size_t i = 0; i < shape.data[0]; i++) {
+        used += reshape_rec(s, (iarr) { .data = shape.data + 1, .len = shape.len - 1 }, orig, index + used);
+    }
+    end_array(s);
+    return used;
+}
+
+// changes the shape of a flat array
+// first arg: shape (array)
+// second arg: array
+void reshape(stack *s) {
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("The first argument to reshape needs to be an array (shape)!");
+    }
+    arr shape = a->data.array;
+
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("The second argument to reshape needs to be an array!");
+    }
+    arr array = b->data.array;
+
+    iarr shape_int;
+    shape_int.len = shape.len;
+    shape_int.data = malloc(shape_int.len * sizeof(int));
+    if (shape_int.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < shape.len; i++) {
+        if (shape.data[i]->type != NUMBER || round(shape.data[i]->data.number) != shape.data[i]->data.number || shape.data[i]->data.number < 0) {
+            rerror("The shape needs to be a array of positive integers!");
+        }
+        shape_int.data[i] = (int) shape.data[i]->data.number;
+    }
+    reshape_rec(s, shape_int, &array, 0);
+    iarr_free(shape_int);
 }

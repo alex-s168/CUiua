@@ -22,6 +22,9 @@ elem *new_elem(elem_type type) {
 }
 
 void free_elem(elem *e) {
+    if (e == NULL) {
+        return;
+    }
     if (e->type == ARRAY) {
         for (size_t i = 0; i < e->data.array.len; i++) {
             free_elem(e->data.array.data[i]);
@@ -64,7 +67,8 @@ char *etostr(elem *e) {
             return str;
         }
         case ARRAY: {
-            char *str = malloc(20);
+            size_t aloccs = 20;
+            char *str = malloc(aloccs);
             if (str == NULL) {
                 rerror("Out of memory!");
             }
@@ -73,8 +77,9 @@ char *etostr(elem *e) {
             for (size_t i = 0; i < e->data.array.len; i++) {
                 char *tmp = etostr(e->data.array.data[i]);
                 size_t len = strlen(tmp);
-                if (pos + len + 1 >= 20) {
-                    str = realloc(str, pos + len + 1);
+                if (pos + len + 1 >= aloccs) {
+                    aloccs = pos + len + 1;
+                    str = realloc(str, aloccs);
                     if (str == NULL) {
                         rerror("Out of memory!");
                     }
@@ -124,4 +129,30 @@ bool elems_equal(elem *a, elem *b) {
         default:
             return false;
     }
+}
+
+// deep-clones an element
+elem *eclone(elem *e) {
+    elem *clone = new_elem(e->type);
+    switch (e->type) {
+        case NUMBER:
+            clone->data.number = e->data.number;
+            break;
+        case ARRAY:
+            clone->data.array.len = e->data.array.len;
+            clone->data.array.data = malloc(sizeof(elem *) * clone->data.array.len);
+            if (clone->data.array.data == NULL) {
+                rerror("Out of memory!");
+            }
+            for (size_t i = 0; i < clone->data.array.len; i++) {
+                clone->data.array.data[i] = eclone(e->data.array.data[i]);
+            }
+            break;
+        case FUNPTR:
+            clone->data.ptr = e->data.ptr;
+            break;
+        default:
+            rerror("Unknown element type %d", e->type);
+    }
+    return clone;
 }

@@ -150,6 +150,20 @@ void indexof(stack *s);
 // if x is an array, it does the member operation for each element in the array and returns a array of the resulting booleans
 void member(stack *s);
 
+// returns the shape of an array (if it has a shape)
+void shape(stack *s);
+
+// repeats the given function n times
+void repeat(stack *s);
+
+// changes the shape of a flat array
+// first arg: shape (array)
+// second arg: array
+void reshape(stack *s);
+
+// executes the given function for each element in an array and returns a array of the results
+void each(stack *s);
+
 // adds the top two elements on the stack
 void add(stack *s);
 
@@ -164,14 +178,6 @@ void mul(stack *s);
 
 bool elems_equal(elem *a, elem *b);
 
-/* the Each-operator
- * (applies a function to each element of an array)
- * (the function is the top element on the stack)
- * (the array is the second element on the stack)
- * (the result is pushed onto the stack)
- *
- * symbol: ∵
- */
-void each(stack *s);
+elem *eclone(elem *e);
 
 #endif //CUIUA_RUNTIME_H
