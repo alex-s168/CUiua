@@ -403,7 +403,7 @@ void indexof(stack *s) {
         rerror("The first argument to indexof needs to be an array!");
     }
     arr array = a->data.array;
-    if (b->type == NUMBER) {
+    if (b->type == NUMBER || b-> type == TYPE) {
         int index = index_of_elem_in_arr(b, array);
         free_elem(a);
         free_elem(b);
@@ -447,7 +447,7 @@ void member(stack *s) {
         rerror("The first argument to member needs to be an array!");
     }
     arr array = a->data.array;
-    if (b->type == NUMBER) {
+    if (b->type == NUMBER || b->type == TYPE) {
         int index = index_of_elem_in_arr(b, array);
         free_elem(a);
         free_elem(b);
@@ -643,4 +643,12 @@ void reshape(stack *s) {
     }
     reshape_rec(s, shape_int, &array, 0);
     iarr_free(shape_int);
+}
+
+// puts the type of the top element on the stack
+void type(stack *s) {
+    elem *e = pop(s);
+    elem *e2 = new_elem(TYPE);
+    e2->data.type = e->type;
+    push(s, e2);
 }

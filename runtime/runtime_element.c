@@ -42,6 +42,8 @@ char *type_to_str(elem_type type) {
             return "array";
         case FUNPTR:
             return "function";
+        case TYPE:
+            return "type";
         default:
             return "unknown";
     }
@@ -49,6 +51,18 @@ char *type_to_str(elem_type type) {
 
 char *etostr(elem *e) {
     switch (e->type) {
+        case TYPE: {
+            switch (e->data.type) {
+                case NUMBER:
+                    return "type(number)";
+                case ARRAY:
+                    return "type(array)";
+                case FUNPTR:
+                    return "type(function)";
+                default:
+                    return "type(unknown)";
+            }
+        }
         case NUMBER: {
             char *str = malloc(30);
             if (str == NULL) {
@@ -115,6 +129,8 @@ bool elems_equal(elem *a, elem *b) {
         return false;
     }
     switch (a->type) {
+        case TYPE:
+            return a->data.type == b->data.type;
         case NUMBER:
             return a->data.number == b->data.number;
         case ARRAY:

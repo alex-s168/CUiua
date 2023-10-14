@@ -28,7 +28,8 @@ typedef struct {
 typedef enum {
     NUMBER,
     ARRAY,
-    FUNPTR
+    FUNPTR,
+    TYPE
 } elem_type;
 
 char *type_to_str(elem_type type);
@@ -38,6 +39,7 @@ struct elem {
         double number;
         arr array;
         funptr ptr;
+        elem_type type;
     } data;
     elem_type type;
 };
@@ -163,6 +165,9 @@ void reshape(stack *s);
 
 // executes the given function for each element in an array and returns a array of the results
 void each(stack *s);
+
+// puts the type of the top element on the stack
+void type(stack *s);
 
 // adds the top two elements on the stack
 void add(stack *s);
