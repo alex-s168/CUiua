@@ -6,6 +6,7 @@
 #define CUIUA_UTILS_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef struct {
     int *data;
@@ -19,5 +20,7 @@ void iarr_init(iarr *a, size_t len);
 void iarr_free(iarr a);
 
 void iarr_append(iarr *a, int n);
+
+bool iarr_contains(iarr a, int n);
 
 #endif //CUIUA_UTILS_H

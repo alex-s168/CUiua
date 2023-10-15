@@ -383,6 +383,18 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  assert(s);\n");
             continue;
         }
+        UC(curr, "↥") {
+            fprintf(main, "  max_op(s);\n");
+            continue;
+        }
+        UC(curr, "↧") {
+            fprintf(main, "  min_op(s);\n");
+            continue;
+        }
+        UC(curr, "◫") {
+            fprintf(main, "  split_op(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {

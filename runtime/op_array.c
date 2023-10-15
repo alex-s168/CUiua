@@ -1051,3 +1051,41 @@ void scan(stack *s) {
     free_elem(b);
     free_elem(f);
 }
+
+// first array is the array to be split
+// second array is the array of indiecies to split at
+// example 1:
+//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [4 5 6] [7 8 9]]
+void split_op(stack *s) {
+    elem *split = pop(s);
+    if (split->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(split->type));
+    }
+
+    elem *array = pop(s);
+    if (array->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(array->type));
+    }
+
+    arr arr = array->data.array;
+
+    iarr split_arr = arr_to_iarr(split->data.array);
+    free_elem(split);
+
+    new_array(s);
+
+    new_array(s);
+    for (size_t i = 0; i < arr.len; i ++) {
+        if (iarr_contains(split_arr, i)) {
+            end_array(s);
+            new_array(s);
+        }
+        push(s, arr.data[i]);
+    }
+    end_array(s);
+
+    end_array(s);
+
+    free(arr.data);
+    free(array);
+}

@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include "utils.h"
 
 // runtime error
 void rerror(char *fmt, ...);
@@ -122,5 +123,7 @@ void sdump(stack *s);
 bool elems_equal(elem *a, elem *b);
 
 elem *eclone(elem *e);
+
+iarr arr_to_iarr(arr a);
 
 #endif //CUIUA_RUNTIME_H

@@ -361,3 +361,29 @@ void assert(stack *s) {
         rerror("Assertion error!");
     }
 }
+
+// max of two elements
+void max_op(stack *s) {
+    elem *a = pop(s);
+    elem *b = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Max operator can only be used on numbers!");
+    }
+    if (a->data.number > b->data.number) {
+        b->data.number = a->data.number;
+    }
+    free_elem(a);
+}
+
+// min of two elements
+void min_op(stack *s) {
+    elem *a = pop(s);
+    elem *b = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Min operator can only be used on numbers!");
+    }
+    if (a->data.number < b->data.number) {
+        b->data.number = a->data.number;
+    }
+    free_elem(a);
+}

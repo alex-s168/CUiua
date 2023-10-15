@@ -97,5 +97,9 @@
     And!
 )
 
-[4 7 ♮ ♮ 9 3 ♮ 6 5] SudokuRowValid!
+# [4 7 ♮ ♮ 9 3 ♮ 6 5] SudokuRowValid!
 
+
+
+
+[1 4 9 2 0 8 5 7 3 9] . 9 ⌕ ⊚ ◫

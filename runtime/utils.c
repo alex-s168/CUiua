@@ -47,3 +47,12 @@ void iarr_append(iarr *a, int n) {
     }
     a->data[a->len - 1] = n;
 }
+
+bool iarr_contains(iarr a, int n) {
+    for (int i = 0; i < a.len; i++) {
+        if (a.data[i] == n) {
+            return true;
+        }
+    }
+    return false;
+}

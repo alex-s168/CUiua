@@ -102,3 +102,19 @@ void sdump(stack *s) {
         printf("%s\n", etostr(s->data[i]));
     }
 }
+
+iarr arr_to_iarr(arr a) {
+    iarr ia;
+    ia.data = malloc(a.len * sizeof(int));
+    if (ia.data == NULL) {
+        rerror("Out of memory!");
+    }
+    ia.len = a.len;
+    for (size_t i = 0; i < a.len; i++) {
+        if (a.data[i]->type != NUMBER) {
+            rerror("Expected number in array!");
+        }
+        ia.data[i] = (int) a.data[i]->data.number;
+    }
+    return ia;
+}

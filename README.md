@@ -20,6 +20,12 @@ or
 ## 
 
 ## Usage
+Just execute a CUiua program:
+```sh
+./exec.sh program.cua
+```
+
+Manually:
 ```sh
 # Build the transpiler
 make

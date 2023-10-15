@@ -201,4 +201,16 @@ void gte(stack *s);
 // throws an error if the top element on the stack is not true
 void assert(stack *s);
 
+// max of two elements
+void max_op(stack *s);
+
+// min of two elements
+void min_op(stack *s);
+
+// first array is the array to be split
+// second array is the array of indiecies to split at
+// example 1:
+//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [4 5 6] [7 8 9]]
+void split_op(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
