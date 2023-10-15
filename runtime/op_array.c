@@ -1089,3 +1089,42 @@ void split_op(stack *s) {
     free(arr.data);
     free(array);
 }
+
+// applies a function to each possible combination of two arrays
+// example:
+//   [1 2 3] [9 2 9 5] table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
+void table(stack *s) {
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("Expected function, got %s!", type_to_str(f->type));
+    }
+
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(a->type));
+    }
+
+    arr array_a = a->data.array;
+    arr array_b = b->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array_a.len; i++) {
+        new_array(s);
+        for (size_t j = 0; j < array_b.len; j++) {
+            push(s, array_a.data[i]);
+            push(s, array_b.data[j]);
+            f->data.ptr(s);
+        }
+        end_array(s);
+    }
+    end_array(s);
+
+    free_elem(a);
+    free_elem(b);
+    free_elem(f);
+}

@@ -213,4 +213,9 @@ void min_op(stack *s);
 //   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [4 5 6] [7 8 9]]
 void split_op(stack *s);
 
+// applies a function to each possible combination of two arrays
+// example:
+//   [1 2 3] [9 2 9 5] table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
+void table(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
