@@ -70,6 +70,9 @@ void new_array(stack *s);
 // ends a array literal
 void end_array(stack *s);
 
+// ends a array literal (reverses array)
+void end_array_rev(stack *s);
+
 // pushes a array onto the stack
 void push_array(stack *s, arr array);
 

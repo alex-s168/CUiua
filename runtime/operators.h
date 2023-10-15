@@ -144,4 +144,25 @@ void keep(stack *s);
 //   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
 void find(stack *s);
 
+// Combine two arrays OR scalars as rows of a new array
+// example 1:
+//   [1 2 3] [4 5 6] couple  ->  [[1 2 3] [4 5 6]]
+// example 2:
+//   1 [2 3 4] couple  ->  [[1] [2 3 4]]
+void couple(stack *s);
+
+// Apply a function to a fixed value and each element of an array
+void distribute(stack *s);
+
+// Apply a reducing function to an array
+void reduce(stack *s);
+
+// Apply a reducing function to an array with an initial value
+void fold(stack *s);
+
+// Reduce, but keep intermediate values
+// example:
+//   [1 2 3 4 5] +scan  ->  [1 3 6 10 15]
+void scan(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

@@ -229,10 +229,6 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  repeat(s);\n");
             continue;
         }
-        UC(curr, "∵") {
-            fprintf(main, "  each(s);\n");
-            continue;
-        }
         UC(curr, "↯") {
             fprintf(main, "  reshape(s);\n");
             continue;
@@ -326,6 +322,18 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  find(s);\n");
             continue;
         }
+        UC(curr, "⊟") {
+            fprintf(main, "  couple(s);\n");
+            continue;
+        }
+        UC(curr, "∺") {
+            fprintf(main, "  distribute(s);\n");
+            continue;
+        }
+        UC(curr, "∧") {
+            fprintf(main, "  fold(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {
@@ -393,6 +401,12 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 break;
             case '-':
                 fprintf(main, "  sub(s);\n");
+                break;
+            case '/':
+                fprintf(main, "  reduce(s);\n");
+                break;
+            case '\\':
+                fprintf(main, "  scan(s);\n");
                 break;
             case ' ':
             case '\n' :

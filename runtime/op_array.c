@@ -184,34 +184,72 @@ void match(stack *s) {
     push(s, e);
 }
 
-// joins two arrays end-to-end
+// joins two arrays OR scalars end-to-end
 void join(stack *s) {
     elem *b = pop(s);
-    if (b->type != ARRAY) {
-        rerror("The second argument to join needs to be an array!");
+    elem *a = pop(s);
+    if (a->type == ARRAY && b->type == ARRAY) {
+        arr array_a = a->data.array;
+        arr array_b = b->data.array;
+        arr new_array;
+        new_array.len = array_a.len + array_b.len;
+        new_array.data = malloc(new_array.len * sizeof(elem *));
+        if (new_array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        for (size_t i = 0; i < array_a.len; i++) {
+            new_array.data[i] = array_a.data[i];
+        }
+        for (size_t i = 0; i < array_b.len; i++) {
+            new_array.data[array_a.len + i] = array_b.data[i];
+        }
+        free(array_a.data);
+        free(array_b.data);
+        a->data.array = new_array;
+        push(s, a);
+    } else if (a->type == ARRAY && b->type != ARRAY) {
+        arr array_a = a->data.array;
+        arr new_array;
+        new_array.len = array_a.len + 1;
+        new_array.data = malloc(new_array.len * sizeof(elem *));
+        if (new_array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        for (size_t i = 0; i < array_a.len; i++) {
+            new_array.data[i] = array_a.data[i];
+        }
+        new_array.data[array_a.len] = eclone(b);
+        free(array_a.data);
+        a->data.array = new_array;
+        push(s, a);
+    } else if (a->type != ARRAY && b->type == ARRAY) {
+        arr array_b = b->data.array;
+        arr new_array;
+        new_array.len = array_b.len + 1;
+        new_array.data = malloc(new_array.len * sizeof(elem *));
+        if (new_array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        new_array.data[0] = eclone(a);
+        for (size_t i = 0; i < array_b.len; i++) {
+            new_array.data[i + 1] = array_b.data[i];
+        }
+        free(array_b.data);
+        b->data.array = new_array;
+        push(s, b);
+    } else {
+        arr new_array;
+        new_array.len = 2;
+        new_array.data = malloc(new_array.len * sizeof(elem *));
+        if (new_array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        new_array.data[0] = eclone(a);
+        new_array.data[1] = eclone(b);
+        elem *e = new_elem(ARRAY);
+        e->data.array = new_array;
+        push(s, e);
     }
-    elem *a = peek(s);
-    if (a->type != ARRAY) {
-        rerror("The first argument to join needs to be an array!");
-    }
-
-    arr a_arr = a->data.array;
-    arr b_arr = b->data.array;
-
-    if (a_arr.len == 0 && b_arr.len == 0) {
-        return;
-    }
-
-    a_arr.data = realloc(a_arr.data, (a_arr.len + b_arr.len) * sizeof(elem *));
-    if (a_arr.data == NULL) {
-        rerror("Out of memory!");
-    }
-
-    for (size_t i = 0; i < b_arr.len; i++) {
-        a_arr.data[a_arr.len + i] = b_arr.data[i];
-    }
-    a_arr.len += b_arr.len;
-    a->data.array = a_arr;
 }
 
 // select elements from an array
@@ -823,10 +861,10 @@ void find(stack *s) {
                 }
             }
             if (found) {
+                push_number(s, 1);
                 for (size_t j = 1; j < array_b.len; j++) {
                     push_number(s, 0);
                 }
-                push_number(s, 1);
                 i += array_b.len - 1;
             } else {
                 push_number(s, 0);
@@ -842,4 +880,175 @@ void find(stack *s) {
         }
         end_array(s);
     }
+}
+
+// Combine two arrays OR scalars as rows of a new array
+// example 1:
+//   [1 2 3] [4 5 6] couple  ->  [[1 2 3] [4 5 6]]
+// example 2:
+//   1 [2 3 4] couple  ->  [[1] [2 3 4]]
+void couple(stack *s) {
+    elem *b = pop(s);
+    elem *a = pop(s);
+
+    new_array(s);
+
+    if (a->type == ARRAY) {
+        push(s, a);
+        rev(s);
+    }
+    else {
+        arr array;
+        array.len = 1;
+        array.data = malloc(sizeof(elem *));
+        if (array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        array.data[0] = a;
+        push_array(s, array);
+    }
+
+    if (b->type == ARRAY) {
+        push(s, b);
+        rev(s);
+    }
+    else {
+        arr array;
+        array.len = 1;
+        array.data = malloc(sizeof(elem *));
+        if (array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        array.data[0] = b;
+        push_array(s, array);
+    }
+
+    end_array(s);
+}
+
+// Apply a function to a fixed value and each element of an array
+void distribute(stack *s) {
+    elem *f = pop(s);
+    elem *c = pop(s);
+    elem *b = pop(s);
+
+    if (f->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    }
+
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_b = b->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array_b.len; i++) {
+        push(s, c);
+        push(s, array_b.data[i]);
+        f->data.ptr(s);
+    }
+    end_array(s);
+}
+
+// Apply a reducing function to an array
+void reduce(stack *s) {
+    elem *f = pop(s);
+    elem *b = pop(s);
+
+    if (f->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    }
+
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_b = b->data.array;
+
+    if (array_b.len == 0) {
+        rerror("Cannot reduce empty array!");
+    }
+
+    elem *e = eclone(array_b.data[0]);
+    for (size_t i = 1; i < array_b.len; i++) {
+        push(s, e);
+        push(s, array_b.data[i]);
+        f->data.ptr(s);
+        e = pop(s);
+    }
+
+    free_elem(b);
+    free_elem(f);
+    push(s, e);
+}
+
+// Apply a reducing function to an array with an initial value
+void fold(stack *s) {
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("Expected function, got %s!", type_to_str(f->type));
+    }
+
+    elem *i = pop(s);
+
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_b = b->data.array;
+
+    if (array_b.len == 0) {
+        rerror("Cannot fold empty array!");
+    }
+
+    elem *e = i;
+    for (size_t i = 0; i < array_b.len; i++) {
+        push(s, e);
+        push(s, array_b.data[i]);
+        f->data.ptr(s);
+        e = pop(s);
+    }
+
+    free_elem(b);
+    free_elem(f);
+    push(s, e);
+}
+
+// Reduce, but keep intermediate values
+// example:
+//   [1 2 3 4 5] +scan  ->  [1 3 6 10 15]
+void scan(stack *s) {
+    elem *f = pop(s);
+    elem *b = pop(s);
+
+    if (f->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    }
+
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_b = b->data.array;
+
+    if (array_b.len == 0) {
+        rerror("Cannot reduce empty array!");
+    }
+
+    new_array(s);
+    elem *acc = eclone(array_b.data[0]);
+    push(s, acc);
+    for (size_t i = 1; i < array_b.len; i++) {
+        push(s, acc);
+        push(s, array_b.data[i]);
+        f->data.ptr(s);
+        acc = pop(s);
+        push(s, acc);
+    }
+    end_array(s);
+
+    free_elem(b);
+    free_elem(f);
 }

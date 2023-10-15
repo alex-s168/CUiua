@@ -61,7 +61,35 @@ void end_array(stack *s) {
         }
         array.len = len;
         for (size_t i = 0; i < len; i++) {
-            array.data[i] = pop(s);
+            array.data[len-1-i] = pop(s);
+        }
+    }
+    e->type = ARRAY;
+    e->data.array = array;
+    push(s, e);
+}
+
+
+// ends the array literal and pushes it onto the stack (reverses array)
+void end_array_rev(stack *s) {
+    if (array_builder_stack.nextpos == 0) {
+        rerror("Unmatched end_array()!");
+    }
+    elem *e = pop(&array_builder_stack);
+    size_t start = (size_t) e->data.number;
+    size_t len = (size_t) (s->nextpos - start);
+    arr array;
+    if (len == 0 || start > s->nextpos) {
+        array.data = NULL;
+        array.len = 0;
+    } else {
+        array.data = malloc(len * sizeof(elem *));
+        if (array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        array.len = len;
+        for (size_t i = 0; i < len; i++) {
+            array.data[i - 1] = pop(s);
         }
     }
     e->type = ARRAY;
