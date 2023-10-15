@@ -755,3 +755,91 @@ void sort_desc(stack *s) {
 
     push(s, f);
 }
+
+// Discard or copy some rows of an array
+// Takes two arrays. The first array is the number of copies to keep of each row of the second array.
+void keep(stack *s) {
+    elem *a = pop(s);
+    elem *b = pop(s);
+
+    if (a->type != ARRAY || b->type != ARRAY) {
+        rerror("Expected two arrays, got %s and %s!", type_to_str(a->type), type_to_str(b->type));
+    }
+
+    arr array_a = a->data.array;
+    arr array_b = b->data.array;
+
+    if (array_a.len != array_b.len) {
+        rerror("Arrays must have the same length!");
+    }
+
+    new_array(s);
+    for (size_t i = 0; i < array_a.len; i++) {
+        if (array_a.data[i]->type != NUMBER) {
+            rerror("Expected number, got %s!", type_to_str(array_a.data[i]->type));
+        }
+        if (array_a.data[i]->data.number < 0) {
+            rerror("Number must be positive!");
+        }
+        for (size_t j = 0; j < array_a.data[i]->data.number; j++) {
+            push(s, eclone(array_b.data[i]));
+        }
+    }
+    end_array(s);
+}
+
+// Find the occurences of one array in another
+// example 1:
+//   [1 8 5 2 3 5 4 5 6 7] 5 find  ->  [0 0 1 0 0 1 0 1 0 0]
+// example 2:
+//   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
+//
+// first arg is the array to search in
+// second arg is the array OR scalar to search for
+void find(stack *s) {
+    elem *b = pop(s);
+    elem *a = pop(s);
+
+    if (a->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(a->type));
+    }
+
+    arr array_a = a->data.array;
+
+    if (b->type == ARRAY) {
+        arr array_b = b->data.array;
+
+        new_array(s);
+        for (size_t i = 0; i < array_a.len; i++) {
+            bool found = true;
+            for (size_t j = i; j < array_a.len; j++) {
+                size_t wb = j - i;
+                if (wb >= array_b.len) {
+                    break;
+                }
+                if (!elems_equal(array_a.data[j], array_b.data[wb])) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                for (size_t j = 1; j < array_b.len; j++) {
+                    push_number(s, 0);
+                }
+                push_number(s, 1);
+                i += array_b.len - 1;
+            } else {
+                push_number(s, 0);
+            }
+        }
+        end_array(s);
+    } else {
+        new_array(s);
+        for (size_t i = 0; i < array_a.len; i++) {
+            elem *e = new_elem(NUMBER);
+            e->data.number = elems_equal(array_a.data[i], b) ? 1 : 0;
+            push(s, e);
+        }
+        end_array(s);
+    }
+}

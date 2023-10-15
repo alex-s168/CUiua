@@ -109,4 +109,39 @@ void sort_asc(stack *s);
 // returns the indecies to the array as if it was sorted descending
 void sort_desc(stack *s);
 
+// debug prints the top element on the stack without popping it
+void trace(stack *s);
+
+// pushes the number pi onto the stack
+void do_pi(stack *s);
+
+// pushes the number eta onto the stack
+void do_eta(stack *s);
+
+// pushes the number tau onto the stack
+void do_tau(stack *s);
+
+// pushes infinity onto the stack
+void do_inf(stack *s);
+
+// pushes a random number between 0 and 1 onto the stack
+void do_rand(stack *s);
+
+// calls a function twice on one element each
+void both(stack *s);
+
+// temporarily pops the top element on the stack and executes the given function
+void dip(stack *s);
+
+// Discard or copy some rows of an array
+// Takes two arrays. The first array is the number of copies to keep of each row of the second array.
+void keep(stack *s);
+
+// Find the occurences of one array in another
+// example 1:
+//   [1 8 5 2 3 5 4 5 6 7] 5 find  ->  [0 0 1 0 0 1 0 1 0 0]
+// example 2:
+//   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
+void find(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

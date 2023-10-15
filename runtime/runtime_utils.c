@@ -51,13 +51,18 @@ void end_array(stack *s) {
     size_t start = (size_t) e->data.number;
     size_t len = (size_t) (s->nextpos - start);
     arr array;
-    array.data = malloc(len * sizeof(elem *));
-    if (array.data == NULL) {
-        rerror("Out of memory!");
-    }
-    array.len = len;
-    for (size_t i = len; i > 0; i--) {
-        array.data[i - 1] = pop(s);
+    if (len == 0 || start > s->nextpos) {
+        array.data = NULL;
+        array.len = 0;
+    } else {
+        array.data = malloc(len * sizeof(elem *));
+        if (array.data == NULL) {
+            rerror("Out of memory!");
+        }
+        array.len = len;
+        for (size_t i = 0; i < len; i++) {
+            array.data[i] = pop(s);
+        }
     }
     e->type = ARRAY;
     e->data.array = array;

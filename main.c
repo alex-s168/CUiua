@@ -286,6 +286,46 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  sort_desc(s);\n");
             continue;
         }
+        UC(curr, "~") {
+            fprintf(main, "  trace(s);\n");
+            continue;
+        }
+        UC(curr, "π") {
+            fprintf(main, "  do_pi(s);\n");
+            continue;
+        }
+        UC(curr, "η") {
+            fprintf(main, "  do_eta(s);\n");
+            continue;
+        }
+        UC(curr, "τ") {
+            fprintf(main, "  do_tau(s);\n");
+            continue;
+        }
+        UC(curr, "⚂") {
+            fprintf(main, "  do_rand(s);\n");
+            continue;
+        }
+        UC(curr, "∞") {
+            fprintf(main, "  do_inf(s);\n");
+            continue;
+        }
+        UC(curr, "∩") {
+            fprintf(main, "  both(s);\n");
+            continue;
+        }
+        UC(curr, "⊙") {
+            fprintf(main, "  dip(s);\n");
+            continue;
+        }
+        UC(curr, "▽") {
+            fprintf(main, "  keep(s);\n");
+            continue;
+        }
+        UC(curr, "⌕") {
+            fprintf(main, "  find(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {

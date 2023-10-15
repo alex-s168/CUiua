@@ -11,6 +11,7 @@
 #else
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 #endif
 
 // TODO: after popping an element and not using it anymore, free it
@@ -143,4 +144,74 @@ void unbox(stack *s) {
     e->type = unboxed->type;
     e->data = unboxed->data;
     free(unboxed);
+}
+
+// debug prints the top element on the stack without popping it
+void trace(stack *s) {
+    elem *e = peek(s);
+    printf("%s\n", etostr(e));
+}
+
+// pushes the number pi onto the stack
+void do_pi(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = M_PI;
+    push(s, e);
+}
+
+// pushes the number eta onto the stack
+void do_eta(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = M_E;
+    push(s, e);
+}
+
+// pushes the number tau onto the stack
+void do_tau(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = M_PI * 2;
+    push(s, e);
+}
+
+// pushes infinity onto the stack
+void do_inf(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = INFINITY;
+    push(s, e);
+}
+
+// pushes a random number between 0 and 1 onto the stack
+void do_rand(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = (double) rand() / RAND_MAX;
+    push(s, e);
+}
+
+// calls a function twice on one element each
+void both(stack *s) {
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    }
+
+    elem *b = pop(s);
+    elem *a = pop(s);
+
+    push(s, a);
+    f->data.ptr(s);
+
+    push(s, b);
+    f->data.ptr(s);
+}
+
+// temporarily pops the top element on the stack and executes the given function
+void dip(stack *s) {
+    elem *f = pop(s);
+    if (f->type != FUNPTR) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    }
+
+    elem *e = pop(s);
+    f->data.ptr(s);
+    push(s, e);
 }
