@@ -1,2 +1,1 @@
-make
-watch -n0.2 "cat test.cua | ./cuiua > out.c && ./buildrt.sh && ./out"
+make && watch -n0.2 "cat $1 | ./cuiua > out.c && ./buildrt.sh && ./out"

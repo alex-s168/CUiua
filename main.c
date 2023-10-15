@@ -171,7 +171,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             continue;
         }
         UC(curr, "÷") {
-            fprintf(main, "  div(s);\n");
+            fprintf(main, "  div_op(s);\n");
             continue;
         }
         UC(curr, "↙") {
