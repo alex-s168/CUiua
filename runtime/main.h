@@ -81,6 +81,9 @@ void push_array(stack *s, arr array);
 // pushes a number as a one dimensional array
 void push_number(stack *s, double num);
 
+// pushes a boolean
+void push_bool(stack *s, bool b);
+
 // pushes a element onto the stack
 void push(stack *s, elem *e);
 

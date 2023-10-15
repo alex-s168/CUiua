@@ -97,13 +97,14 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
 
             // find function name
             size_t j = i + 1;
-            while (j < len && code[j] != ' ') {
+            while (j < len && code[j] != ' ' && code[j] != '\n' && code[j] != '(') {
                 j++;
             }
             if (j == len) {
                 ERR("Expected function name!");
             }
             char *name = malloc(j - i + 1);
+            memset(name, 0, j - i + 1);
             if (name == NULL) {
                 ERR("Out of memory!");
             }

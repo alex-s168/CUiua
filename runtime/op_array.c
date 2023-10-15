@@ -282,7 +282,7 @@ void select_op(stack *s) {
         if (index >= array.len) {
             rerror("Index out of bounds!");
         }
-        new_array.data[i] = array.data[index];
+        new_array.data[i] = eclone(array.data[index]);
     }
     free(array.data);
     a->data.array = new_array;
@@ -862,22 +862,20 @@ void find(stack *s) {
                 }
             }
             if (found) {
-                push_number(s, 1);
+                push_bool(s, true);
                 for (size_t j = 1; j < array_b.len; j++) {
-                    push_number(s, 0);
+                    push_bool(s, false);
                 }
                 i += array_b.len - 1;
             } else {
-                push_number(s, 0);
+                push_bool(s, false);
             }
         }
         end_array(s);
     } else {
         new_array(s);
         for (size_t i = 0; i < array_a.len; i++) {
-            elem *e = new_elem(NUMBER);
-            e->data.number = elems_equal(array_a.data[i], b) ? 1 : 0;
-            push(s, e);
+            push_bool(s, elems_equal(array_a.data[i], b));
         }
         end_array(s);
     }

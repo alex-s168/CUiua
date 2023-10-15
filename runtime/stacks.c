@@ -100,3 +100,10 @@ void over(stack *s) {
 bool has_next(stack *s) {
     return s->nextpos > 0;
 }
+
+void push_bool(stack *s, bool b) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = b;
+    e->f_bool = true;
+    push(s, e);
+}

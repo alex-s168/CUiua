@@ -184,6 +184,9 @@ bool elems_equal(elem *a, elem *b) {
         case TYPE:
             return a->data.type == b->data.type;
         case NUMBER:
+            if (isnan(a->data.number) && isnan(b->data.number)) {
+                return true;
+            }
             return a->data.number == b->data.number;
         case ARRAY:
             if (a->data.array.len != b->data.array.len) {
