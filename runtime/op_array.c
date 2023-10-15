@@ -555,7 +555,7 @@ void reshape(stack *s) {
     if (b->type != ARRAY) {
         rerror("The second argument to reshape needs to be an array!");
     }
-    arr array = b->data.array;
+    arr array = deshape_rec(b->data.array);
 
     iarr shape_int;
     shape_int.len = shape.len;
