@@ -44,6 +44,8 @@ struct elem {
         elem *boxed;
     } data;
     elem_type type;
+
+    bool f_bool;
 };
 
 struct stack{

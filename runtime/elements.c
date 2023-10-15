@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #endif
 
 elem *new_elem(elem_type type) {
@@ -18,6 +19,7 @@ elem *new_elem(elem_type type) {
         rerror("Out of memory!");
     }
     e->type = type;
+    e->f_bool = false;
     return e;
 }
 
@@ -79,11 +81,41 @@ char *etostr(elem *e) {
             }
         }
         case NUMBER: {
-            char *str = malloc(30);
+            if (e->f_bool) {
+                return e->data.number == 0 ? "⊥" : "⊤";
+            }
+
+            double num = e->data.number;
+            if (num == INFINITY) {
+                return "∞";
+            }
+            if (num == -INFINITY) {
+                return "-∞";
+            }
+            if (isnan(fabs(num))) {
+                return "♮";
+            }
+            if (num == M_PI) {
+                return "π";
+            }
+            if (num == M_E) {
+                return "η";
+            }
+            if (num == M_PI * 2) {
+                return "τ";
+            }
+            char *str = malloc(50);
             if (str == NULL) {
                 rerror("Out of memory!");
             }
-            sprintf(str, "%f", e->data.number);
+            bool neg = num < 0;
+            if (neg) {
+                num = -num;
+            }
+            if (num == -0) {
+                num = 0;
+            }
+            sprintf(str, "%f", num);
             // remove trailing zeros and dot (if possible)
             size_t len = strlen(str);
             while (len > 0 && str[len - 1] == '0') {
@@ -93,6 +125,9 @@ char *etostr(elem *e) {
                 len--;
             }
             str[len] = '\0';
+            if (neg) {
+                strcat(str, "¯");
+            }
             return str;
         }
         case ARRAY: {

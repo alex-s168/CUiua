@@ -165,4 +165,19 @@ void fold(stack *s);
 //   [1 2 3 4 5] +scan  ->  [1 3 6 10 15]
 void scan(stack *s);
 
+// pushes true onto the stack
+void true_op(stack *s);
+
+// pushes false onto the stack
+void false_op(stack *s);
+
+// pushes NaN onto the stack
+void nan_op(stack *s);
+
+// not operator
+void not_op(stack *s);
+
+// negates the top element on the stack
+void negate(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

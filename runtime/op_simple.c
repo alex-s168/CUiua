@@ -215,3 +215,75 @@ void dip(stack *s) {
     f->data.ptr(s);
     push(s, e);
 }
+
+// pushes true onto the stack
+void true_op(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = 1;
+    e->f_bool = true;
+    push(s, e);
+}
+
+// pushes false onto the stack
+void false_op(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = 0;
+    e->f_bool = true;
+    push(s, e);
+}
+
+// pushes NaN onto the stack
+void nan_op(stack *s) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = NAN;
+    push(s, e);
+}
+
+static void not_rec(elem *e) {
+    if (e->type == NUMBER) {
+        e->data.number = !e->data.number;
+        e->f_bool = true;
+        return;
+    }
+    if (e->type == ARRAY) {
+        arr array = e->data.array;
+        for (size_t i = 0; i < array.len; i++) {
+            not_rec(array.data[i]);
+        }
+        return;
+    }
+    if (e->type == BOXED) {
+        not_rec(e->data.boxed);
+        return;
+    }
+    rerror("Invalid type for not!");
+}
+
+// not operator
+void not_op(stack *s) {
+    not_rec(peek(s));
+}
+
+static void negate_rec(elem *e) {
+    if (e->type == NUMBER) {
+        e->data.number = -e->data.number;
+        return;
+    }
+    if (e->type == ARRAY) {
+        arr array = e->data.array;
+        for (size_t i = 0; i < array.len; i++) {
+            negate_rec(array.data[i]);
+        }
+        return;
+    }
+    if (e->type == BOXED) {
+        negate_rec(e->data.boxed);
+        return;
+    }
+    rerror("Invalid type for negate!");
+}
+
+// negates the top element on the stack
+void negate(stack *s) {
+    negate_rec(peek(s));
+}

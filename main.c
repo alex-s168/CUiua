@@ -334,6 +334,26 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  fold(s);\n");
             continue;
         }
+        UC(curr, "⊤") {
+            fprintf(main, "  true_op(s);\n");
+            continue;
+        }
+        UC(curr, "⊥") {
+            fprintf(main, "  false_op(s);\n");
+            continue;
+        }
+        UC(curr, "♮") {
+            fprintf(main, "  nan_op(s);\n");
+            continue;
+        }
+        UC(curr, "¬") {
+            fprintf(main, "  not_op(s);\n");
+            continue;
+        }
+        UC(curr, "¯") {
+            fprintf(main, "  negate(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {
