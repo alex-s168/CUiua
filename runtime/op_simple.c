@@ -287,3 +287,77 @@ static void negate_rec(elem *e) {
 void negate(stack *s) {
     negate_rec(peek(s));
 }
+
+// checks if top two elements on the stack are equal
+void eq(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Equals operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number == b->data.number);
+    a->f_bool = true;
+}
+
+// checks if top two elements on the stack are not equal
+void neq(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Not equals operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number != b->data.number);
+    a->f_bool = true;
+}
+
+// checks if top two elements on the stack are less than
+void lt(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Less than operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number < b->data.number);
+    a->f_bool = true;
+}
+
+// checks if top two elements on the stack are less than or equal to
+void lte(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Less than or equals operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number <= b->data.number);
+    a->f_bool = true;
+}
+
+// checks if top two elements on the stack are greater than
+void gt(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Greater than operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number > b->data.number);
+    a->f_bool = true;
+}
+
+// checks if top two elements on the stack are greater than or equal to
+void gte(stack *s) {
+    elem *b = pop(s);
+    elem *a = peek(s);
+    if (a->type != NUMBER || b->type != NUMBER) {
+        rerror("Greater than or equals operator can only be used on numbers!");
+    }
+    a->data.number = (a->data.number >= b->data.number);
+    a->f_bool = true;
+}
+
+// throws an error if the top element on the stack is not true
+void assert(stack *s) {
+    elem *e = pop(s);
+    if (e->type != NUMBER || e->data.number != true) {
+        rerror("Assertion error!");
+    }
+}

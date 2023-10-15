@@ -180,4 +180,25 @@ void not_op(stack *s);
 // negates the top element on the stack
 void negate(stack *s);
 
+// checks if top two elements on the stack are equal
+void eq(stack *s);
+
+// checks if top two elements on the stack are not equal
+void neq(stack *s);
+
+// checks if top two elements on the stack are less than
+void lt(stack *s);
+
+// checks if top two elements on the stack are less than or equal to
+void lte(stack *s);
+
+// checks if top two elements on the stack are greater than
+void gt(stack *s);
+
+// checks if top two elements on the stack are greater than or equal to
+void gte(stack *s);
+
+// throws an error if the top element on the stack is not true
+void assert(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

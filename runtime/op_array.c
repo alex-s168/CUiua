@@ -181,6 +181,7 @@ void match(stack *s) {
     free_elem(b);
     elem *e = new_elem(NUMBER);
     e->data.number = match ? 1 : 0;
+    e->f_bool = true;
     push(s, e);
 }
 
