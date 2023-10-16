@@ -20,6 +20,7 @@ elem *new_elem(elem_type type) {
     }
     e->type = type;
     e->f_bool = false;
+    e->f_char = false;
     return e;
 }
 
@@ -86,6 +87,18 @@ char *etostr(elem *e) {
             }
 
             double num = e->data.number;
+            if (e->f_char) {
+                char *str = malloc(4);
+                if (str == NULL) {
+                    rerror("Out of memory!");
+                }
+                str[0] = '\'';
+                str[1] = (char) num;
+                str[2] = '\'';
+                str[3] = '\0';
+                return str;
+            }
+
             if (num == INFINITY) {
                 return "∞";
             }
@@ -133,8 +146,14 @@ char *etostr(elem *e) {
         case ARRAY: {
             // first, calculate the length of the string
             size_t len = 2; // [[
+            bool is_all_chars = true;
             for (size_t i = 0; i < e->data.array.len; i++) {
-                len += strlen(etostr(e->data.array.data[i]));
+                elem *x = e->data.array.data[i];
+                if (x->f_char) {
+                    continue;
+                }
+                is_all_chars = false;
+                len += strlen(etostr(x));
                 len += 1; // space
             }
             if (e->data.array.len > 0) {
@@ -146,6 +165,19 @@ char *etostr(elem *e) {
             char *str = malloc(len);
             if (str == NULL) {
                 rerror("Out of memory!");
+            }
+
+            if (is_all_chars) {
+                // copy the string
+                str[0] = '"';
+                size_t i = 0;
+                for (; i < e->data.array.len; i++) {
+                    str[i + 1] = (char) e->data.array.data[i]->data.number;
+                }
+                str[i + 1] = '"';
+                str[i + 2] = '\0';
+
+                return str;
             }
 
             // copy the string
@@ -215,6 +247,7 @@ elem *eclone(elem *e) {
         case NUMBER:
             clone->data.number = e->data.number;
             clone->f_bool = e->f_bool;
+            clone->f_char = e->f_char;
             break;
         case ARRAY:
             clone->data.array.len = e->data.array.len;

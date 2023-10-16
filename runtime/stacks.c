@@ -8,6 +8,7 @@
 #include "std.h"
 #else
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 void sinit(stack *s) {
@@ -69,6 +70,31 @@ void push_array(stack *s, arr array) {
     elem *e = new_elem(ARRAY);
     e->data.array = array;
     push(s, e);
+}
+
+// pushes a char
+void push_char(stack *s, char c) {
+    elem *e = new_elem(NUMBER);
+    e->data.number = c;
+    e->f_char = true;
+    push(s, e);
+}
+
+void push_string(stack *s, char *str) {
+    arr array;
+    size_t len = strlen(str);
+    array.len = len;
+    array.data = malloc(len * sizeof(elem *));
+    if (array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < len; i++) {
+        elem *c = new_elem(NUMBER);
+        c->data.number = str[i];
+        c->f_char = true;
+        array.data[i] = c;
+    }
+    push_array(s, array);
 }
 
 elem *peek(stack *s) {

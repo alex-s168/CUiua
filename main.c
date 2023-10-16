@@ -455,6 +455,28 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 i = j;
                 break;
             }
+            case '"': {
+                // parse string
+                // handle escape sequences
+                size_t j = i + 1;
+                while (j < len && code[j] != '"') {
+                    if (code[j] == '\\') {
+                        j++;
+                    }
+                    j++;
+                }
+                if (j == len) {
+                    ERR("Unmatched quote!");
+                }
+                fprintf(main, "  push_string(s, \"%.*s\");\n", (int) (j - i - 1), code + i + 1);
+                i = j;
+                break;
+            }
+            case '@': {
+                char c = code[++i];
+                fprintf(main, "  push_char(s, '%c');", c);
+                break;
+            }
             case '[': {
                 fprintf(main, "  new_array(s);\n");
                 break;

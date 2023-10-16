@@ -2,6 +2,8 @@
 Stack based array programming language heavily inspired 
 by Uiua.
 
+Recommended font: [DejaVu Sans Mono for CUiua](https://github.com/SuperCraftAlex/DejaVu-for-CUiua)
+
 ## Example code
 ### Find the lowest number in an array
 ```
@@ -22,8 +24,6 @@ or
 ```
 ⟼Fragment (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡Xor!¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
 ```
-
-## 
 
 ## Usage
 Just execute a CUiua program:

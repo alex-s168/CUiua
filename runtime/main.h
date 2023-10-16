@@ -47,6 +47,7 @@ struct elem {
     elem_type type;
 
     bool f_bool;
+    bool f_char;
 };
 
 struct stack{
@@ -79,8 +80,14 @@ void end_array_rev(stack *s);
 // pushes a array onto the stack
 void push_array(stack *s, arr array);
 
-// pushes a number as a one dimensional array
+// pushes a number
 void push_number(stack *s, double num);
+
+// pushes a string
+void push_string(stack *s, char *str);
+
+// pushes a char
+void push_char(stack *s, char c);
 
 // pushes a boolean
 void push_bool(stack *s, bool b);
