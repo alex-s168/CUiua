@@ -57,6 +57,7 @@ void shape(stack *s);
 void repeat(stack *s);
 
 // changes the shape of a flat array
+// if the array is too short for the shape, it padds with zeros
 // first arg: shape (array)
 // second arg: array
 void reshape(stack *s);
@@ -268,5 +269,8 @@ void cast_string(stack *s);
 // for strings:
 //   parses the string as a number
 void cast_real(stack *s);
+
+// rotates the shape of an array
+void transpose(stack *s);
 
 #endif //CUIUA_RUNTIME_OPERATORS_H

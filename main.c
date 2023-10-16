@@ -274,7 +274,10 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  enumerate(s);\n");
             continue;
         }
-        // TODO: transpose (⍉)
+        UC(curr, "⍉") {
+            fprintf(main, "  transpose(s);\n");
+            continue;
+        }
         UC(curr, "⍏") {
             fprintf(main, "  sort_asc(s);\n");
             continue;

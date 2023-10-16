@@ -129,7 +129,7 @@ void rev(stack *s) {
 static arr deshape_rec(arr a) {
     arr new_array;
     new_array.len = 0;
-    new_array.data = malloc(0);
+    new_array.data = malloc(1);
     if (new_array.data == NULL) {
         rerror("Out of memory!");
     }
@@ -137,7 +137,7 @@ static arr deshape_rec(arr a) {
         if (a.data[i]->type == ARRAY) {
             arr sub_array = deshape_rec(a.data[i]->data.array);
             new_array.len += sub_array.len;
-            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
+            new_array.data = realloc(new_array.data, (new_array.len + 1) * sizeof(elem *));
             if (new_array.data == NULL) {
                 rerror("Out of memory!");
             }
@@ -147,7 +147,7 @@ static arr deshape_rec(arr a) {
             free(sub_array.data);
         } else {
             new_array.len++;
-            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
+            new_array.data = realloc(new_array.data, (new_array.len + 1) * sizeof(elem *));
             if (new_array.data == NULL) {
                 rerror("Out of memory!");
             }
@@ -520,13 +520,17 @@ int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
         return 0;
     }
     if (shape.len == 1) {
-        if (shape.data[0] > orig->len + index) {
-            rerror("Cannot reshape array to a bigger size!");
-        }
         new_array(s);
         size_t i;
         for (i = 0; i < shape.data[0]; i++) {
-            elem *e = orig->data[index + i];
+            elem *e;
+            if (i >= orig->len + index) {
+                e = new_elem(NUMBER);
+                e->data.number = 0;
+            }
+            else {
+                e = orig->data[index + i];
+            }
             push(s, e);
         }
         end_array(s);
@@ -1218,4 +1222,14 @@ void fragment(stack *s) {
 
     free(arr.data);
     free(array);
+}
+
+// rotates the shape of an array
+void transpose(stack *s) {
+    elem *arre = peek(s);
+    if (arre->type != ARRAY) {
+        rerror("Transpose can only be applied on multi-dimensional arrays!");
+    }
+
+    rerror("Transpose not implemented yet!");
 }
