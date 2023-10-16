@@ -399,6 +399,18 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  table(s);\n");
             continue;
         }
+        UC(curr, "⊕") {
+            fprintf(main, "  group(s);\n");
+            continue;
+        }
+        UC(curr, "⊓") {
+            fprintf(main, "  bracket(s);\n");
+            continue;
+        }
+        UC(curr, "≡") {
+            fprintf(main, "  dearray(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {

@@ -214,6 +214,7 @@ elem *eclone(elem *e) {
             break;
         case NUMBER:
             clone->data.number = e->data.number;
+            clone->f_bool = e->f_bool;
             break;
         case ARRAY:
             clone->data.array.len = e->data.array.len;

@@ -101,6 +101,8 @@ void box(stack *s);
 void unbox(stack *s);
 
 // enumerates an array
+// equals to:
+//   duplicate length range group
 void enumerate(stack *s);
 
 // returns the indecies to the array as if it was sorted ascending
@@ -217,5 +219,18 @@ void split_op(stack *s);
 // example:
 //   [1 2 3] [9 2 9 5] table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
 void table(stack *s);
+
+// combines two arrays by grouping each element of one array into a pair with the corresponding element of the other array
+// if the arrays are not the same length, the shorter one is padded with zeros
+// example:
+//   [1 2 3] [4 5 6] group  ->  [[1 4] [2 5] [3 6]]
+void group(stack *s);
+
+// call two functions on two elements
+void bracket(stack *s);
+
+// pushes all elements of an array onto the stack
+// if no array is given, it does nothing
+void dearray(stack *s);
 
 #endif //CUIUA_RUNTIME_OPERATORS_H

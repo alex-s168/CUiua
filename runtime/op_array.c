@@ -603,10 +603,9 @@ void first(stack *s) {
     if (array.len == 0) {
         rerror("Cannot get first element of empty array!");
     }
-    elem *e2 = array.data[0];
+    push(s, array.data[0]);
     free(array.data);
-    e->data.array = array;
-    push(s, e2);
+    free(e);
 }
 
 // makes an array of all natural numbers from 0 to n
@@ -1127,4 +1126,61 @@ void table(stack *s) {
     free_elem(a);
     free_elem(b);
     free_elem(f);
+}
+
+// combines two arrays by grouping each element of one array into a pair with the corresponding element of the other array
+// if the arrays are not the same length, the shorter one is padded with zeros
+// example:
+//   [1 2 3] [4 5 6] group  ->  [[1 4] [2 5] [3 6]]
+void group(stack *s) {
+    elem *b = pop(s);
+    if (b->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    elem *a = pop(s);
+    if (a->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(a->type));
+    }
+
+    arr array_a = a->data.array;
+    arr array_b = b->data.array;
+
+    new_array(s);
+    for (size_t i = 0; i < array_a.len || i < array_b.len; i++) {
+        new_array(s);
+        if (i < array_a.len) {
+            push(s, array_a.data[i]);
+        } else {
+            push_number(s, 0);
+        }
+        if (i < array_b.len) {
+            push(s, array_b.data[i]);
+        } else {
+            push_number(s, 0);
+        }
+        end_array(s);
+    }
+    end_array(s);
+
+    free(array_a.data);
+    free(array_b.data);
+    free(a);
+    free(b);
+}
+
+// pushes all elements of an array onto the stack
+// if no array is given, it does nothing
+void dearray(stack *s) {
+    elem *e = pop(s);
+    if (e->type != ARRAY) {
+        push(s, e);
+        return;
+    }
+    arr array = e->data.array;
+    for (size_t i = 0; i < array.len; i++) {
+        push(s, array.data[i]);
+    }
+    free(array.data);
+    free(e);
 }

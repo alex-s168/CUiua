@@ -387,3 +387,25 @@ void min_op(stack *s) {
     }
     free_elem(a);
 }
+
+// call two functions on two elements
+void bracket(stack *s) {
+    elem *f1 = pop(s);
+    if (f1->type != FUNPTR) {
+        rerror("Expected function, got %s!", type_to_str(f1->type));
+    }
+
+    elem *f2 = pop(s);
+    if (f2->type != FUNPTR) {
+        rerror("Expected function, got %s!", type_to_str(f2->type));
+    }
+
+    elem *b = pop(s);
+    elem *a = pop(s);
+
+    push(s, a);
+    f1->data.ptr(s);
+
+    push(s, b);
+    f2->data.ptr(s);
+}
