@@ -124,6 +124,9 @@ void sfree(stack *s);
 // element to string
 char *etostr(elem *e);
 
+// element to string
+char *etostra(elem *e, bool negative_sign_right);
+
 // prints the whole stack
 void sdump(stack *s);
 

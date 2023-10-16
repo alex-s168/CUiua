@@ -58,6 +58,10 @@ char *type_to_str(elem_type type) {
 }
 
 char *etostr(elem *e) {
+    return etostra(e, true);
+}
+
+char *etostra(elem *e, bool negative_sign_right) {
     switch (e->type) {
         case BOXED: {
             char *str = malloc(30);
@@ -121,12 +125,15 @@ char *etostr(elem *e) {
             if (str == NULL) {
                 rerror("Out of memory!");
             }
-            bool neg = num < 0;
-            if (neg) {
-                num = -num;
-            }
-            if (num == -0) {
-                num = 0;
+            bool neg = false;
+            if (negative_sign_right) {
+                neg = num < 0;
+                if (neg) {
+                    num = -num;
+                }
+                if (num == -0) {
+                    num = 0;
+                }
             }
             sprintf(str, "%f", num);
             // remove trailing zeros and dot (if possible)

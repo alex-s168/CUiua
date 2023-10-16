@@ -247,4 +247,22 @@ void read_file(stack *s);
 // writes a string to a file (overwrites / creates the file)
 void write_file(stack *s);
 
+// for numbers:
+//   converts it to an integer (equals to floor)
+// for strings:
+//   parses the string as a integer (equals to real and then floor)
+void cast_integer(stack *s);
+
+// for numbers:
+//   converts it to a string (negative sign gets appended in front of the string if the number is negative
+// for strings:
+//   does nothing
+void cast_string(stack *s);
+
+// for numbers:
+//   does nothing
+// for strings:
+//   parses the string as a number
+void cast_real(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

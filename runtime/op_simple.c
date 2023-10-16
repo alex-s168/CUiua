@@ -456,3 +456,60 @@ void write_file(stack *s) {
     free(filename);
     free(str1);
 }
+
+// for numbers:
+//   converts it to an integer (equals to floor)
+// for strings:
+//   parses the string as an integer (equals to real and then floor)
+void cast_integer(stack *s) {
+    elem *e = peek(s);
+
+    if (e->type == NUMBER) {
+        e->data.number = (int) e->data.number;
+        return;
+    }
+
+    if (e->type == ARRAY) {
+        char *str = arr_to_str(e->data.array);
+        e->data.number = (double) atoi(str);
+        e->type = NUMBER;
+        return;
+    }
+
+    rerror("Invalid type for cast_integer!");
+}
+
+// for numbers:
+//   converts it to a string (negative sign gets appended in front of the string if the number is negative
+// for strings:
+//   does nothing
+void cast_string(stack *s) {
+    elem *e = peek(s);
+    char *str = etostra(e, false);
+    e->data.array = str_to_arr(str);
+    e->type = ARRAY;
+    e->f_bool = false;
+    e->f_char = false;
+    free(str);
+}
+
+// for numbers:
+//   does nothing
+// for strings:
+//   parses the string as a number
+void cast_real(stack *s) {
+    elem *e = peek(s);
+
+    if (e->type == NUMBER) {
+        return;
+    }
+
+    if (e->type == ARRAY) {
+        char *str = arr_to_str(e->data.array);
+        e->data.number = atof(str);
+        e->type = NUMBER;
+        return;
+    }
+
+    rerror("Invalid type for cast_real!");
+}

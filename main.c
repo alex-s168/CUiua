@@ -411,10 +411,6 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  dearray(s);\n");
             continue;
         }
-        UC(curr, "frag") {
-            fprintf(main, "  fragment(s);\n");
-            continue;
-        }
         UC(curr, "⬡") {
             fprintf(main, "  fragment(s);\n");
             continue;
@@ -427,8 +423,20 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  read_file(s);\n");
             continue;
         }
-        UC(curr, "nl") {
+        UC(curr, "nl") { // TODO: find character for this
             fprintf(main, "  push_char(s, '\\n');\n");
+            continue;
+        }
+        UC(curr, "ℤ") {
+            fprintf(main, "  cast_integer(s);\n");
+            continue;
+        }
+        UC(curr, "ℝ") {
+            fprintf(main, "  cast_real(s);\n");
+            continue;
+        }
+        UC(curr, "𝕐") {
+            fprintf(main, "  cast_string(s);\n");
             continue;
         }
         switch (code[i]) {
