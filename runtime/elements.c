@@ -146,8 +146,9 @@ char *etostr(elem *e) {
         case ARRAY: {
             // first, calculate the length of the string
             size_t len = 2; // [[
-            bool is_all_chars = true;
-            for (size_t i = 0; i < e->data.array.len; i++) {
+            size_t rlen = e->data.array.len;
+            bool is_all_chars = (rlen > 0);
+            for (size_t i = 0; i < rlen; i++) {
                 elem *x = e->data.array.data[i];
                 if (x->f_char) {
                     continue;
@@ -156,28 +157,30 @@ char *etostr(elem *e) {
                 len += strlen(etostr(x));
                 len += 1; // space
             }
-            if (e->data.array.len > 0) {
+            if (rlen > 0) {
                 len--; // no space after last element
             }
             len += 2; // ]]
 
-            // allocate the string
-            char *str = malloc(len);
-            if (str == NULL) {
-                rerror("Out of memory!");
-            }
-
             if (is_all_chars) {
+                char *str = malloc(rlen + 3);
+
                 // copy the string
                 str[0] = '"';
                 size_t i = 0;
-                for (; i < e->data.array.len; i++) {
+                for (; i < rlen; i++) {
                     str[i + 1] = (char) e->data.array.data[i]->data.number;
                 }
                 str[i + 1] = '"';
                 str[i + 2] = '\0';
 
                 return str;
+            }
+
+            // allocate the string
+            char *str = malloc(len);
+            if (str == NULL) {
+                rerror("Out of memory!");
             }
 
             // copy the string
@@ -250,12 +253,13 @@ elem *eclone(elem *e) {
             clone->f_char = e->f_char;
             break;
         case ARRAY:
-            clone->data.array.len = e->data.array.len;
-            clone->data.array.data = malloc(sizeof(elem *) * clone->data.array.len);
+            size_t len = e->data.array.len;
+            clone->data.array.len = len;
+            clone->data.array.data = malloc(sizeof(elem *) * len);
             if (clone->data.array.data == NULL) {
                 rerror("Out of memory!");
             }
-            for (size_t i = 0; i < clone->data.array.len; i++) {
+            for (size_t i = 0; i < len; i++) {
                 clone->data.array.data[i] = eclone(e->data.array.data[i]);
             }
             break;

@@ -133,6 +133,10 @@ elem *eclone(elem *e);
 
 iarr arr_to_iarr(arr a);
 
+char *arr_to_str(arr a);
+
+arr str_to_arr(char *str);
+
 bool is_positive_int(elem *e);
 
 #endif //CUIUA_RUNTIME_H

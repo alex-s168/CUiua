@@ -1053,8 +1053,11 @@ void scan(stack *s) {
 
 // first array is the array to be split
 // second array is the array of indiecies to split at
+// every split position will be removed from the array
 // example 1:
-//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [4 5 6] [7 8 9]]
+//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [5 6] [8 9]]
+// split can be used to remove elements from an array at specific positions like this:
+//   [1 2 3 4 5 6 7 8 9] [3 6] split deshape  ->  [1 2 3 5 6 8 9]
 void split_op(stack *s) {
     elem *split = pop(s);
     if (split->type != ARRAY) {
@@ -1078,6 +1081,7 @@ void split_op(stack *s) {
         if (iarr_contains(split_arr, i)) {
             end_array(s);
             new_array(s);
+            continue;
         }
         push(s, arr.data[i]);
     }

@@ -419,6 +419,18 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  fragment(s);\n");
             continue;
         }
+        UC(curr, "⇱") {
+            fprintf(main, "  write_file(s);\n");
+            continue;
+        }
+        UC(curr, "⇲") {
+            fprintf(main, "  read_file(s);\n");
+            continue;
+        }
+        UC(curr, "nl") {
+            fprintf(main, "  push_char(s, '\\n');\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n') {

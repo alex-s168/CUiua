@@ -409,3 +409,50 @@ void bracket(stack *s) {
     push(s, b);
     f2->data.ptr(s);
 }
+
+// reads all text from a file into a single string
+void read_file(stack *s) {
+    elem *name = pop(s);
+    if (name->type != ARRAY) {
+        rerror("Expected string (array), got %s!", type_to_str(name->type));
+    }
+    char *filename = arr_to_str(name->data.array);
+    FILE *f = fopen(filename, "r");
+    if (f == NULL) {
+        rerror("Could not open file %s!", filename);
+    }
+    fseek(f, 0, SEEK_END);
+    size_t len = ftell(f);
+    rewind(f);
+    char *str = malloc(len + 1);
+    fread(str, 1, len, f);
+    fclose(f);
+    str[len] = '\0';
+    push_string(s, str);
+    free(filename);
+    free(str);
+}
+
+// writes a string to a file (overwrites / creates the file)
+void write_file(stack *s) {
+    elem *name = pop(s);
+    if (name->type != ARRAY) {
+        rerror("Expected string (array), got %s!", type_to_str(name->type));
+    }
+
+    elem *str = pop(s);
+    if (str->type != ARRAY) {
+        rerror("Expected string (array), got %s!", type_to_str(str->type));
+    }
+
+    char *filename = arr_to_str(name->data.array);
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        rerror("Could not open file %s!", filename);
+    }
+    char *str1 = arr_to_str(str->data.array);
+    fputs(str1, f);
+    fclose(f);
+    free(filename);
+    free(str1);
+}

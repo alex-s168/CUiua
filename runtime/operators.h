@@ -211,8 +211,11 @@ void min_op(stack *s);
 
 // first array is the array to be split
 // second array is the array of indiecies to split at
+// every split position will be removed from the array
 // example 1:
-//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [4 5 6] [7 8 9]]
+//   [1 2 3 4 5 6 7 8 9] [3 6] split  ->  [[1 2 3] [5 6] [8 9]]
+// split can be used to remove elements from an array at specific positions like this:
+//   [1 2 3 4 5 6 7 8 9] [3 6] split deshape  ->  [1 2 3 5 6 8 9]
 void split_op(stack *s);
 
 // applies a function to each possible combination of two arrays
@@ -237,5 +240,11 @@ void dearray(stack *s);
 // example:
 //   [3 9 2 1 6] 1 3 fragment  ->  [3 6]
 void fragment(stack *s);
+
+// reads all text from a file into a single string
+void read_file(stack *s);
+
+// writes a string to a file (overwrites / creates the file)
+void write_file(stack *s);
 
 #endif //CUIUA_RUNTIME_OPERATORS_H

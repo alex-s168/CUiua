@@ -1,3 +1,4 @@
 # Project exclude paths
 /cmake-build-debug/
 test2.cua
+test/
