@@ -233,4 +233,9 @@ void bracket(stack *s);
 // if no array is given, it does nothing
 void dearray(stack *s);
 
+// removes a fragment from an array
+// example:
+//   [3 9 2 1 6] 1 3 fragment  ->  [3 6]
+void fragment(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

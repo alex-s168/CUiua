@@ -118,3 +118,7 @@ iarr arr_to_iarr(arr a) {
     }
     return ia;
 }
+
+bool is_positive_int(elem *e) {
+    return e->type == NUMBER && e->data.number == (int) e->data.number && e->data.number >= 0;
+}

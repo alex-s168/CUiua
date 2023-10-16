@@ -1184,3 +1184,47 @@ void dearray(stack *s) {
     free(array.data);
     free(e);
 }
+
+// removes a fragment from an array
+// example:
+//   [3 9 2 1 6] 1 3 fragment  ->  [3 6]
+void fragment(stack *s) {
+    elem *end = pop(s);
+    if (!is_positive_int(end)) {
+        rerror("Expected positive integer, got %s!", type_to_str(end->type));
+    }
+    elem *start = pop(s);
+    if (!is_positive_int(start)) {
+        rerror("Expected positive integer, got %s!", type_to_str(start->type));
+    }
+
+    elem *array = pop(s);
+    if (array->type != ARRAY) {
+        rerror("Expected array, got %s!", type_to_str(array->type));
+    }
+
+    arr arr = array->data.array;
+
+    if (start->data.number >= arr.len) {
+        rerror("Start index out of bounds!");
+    }
+
+    if (end->data.number > arr.len) {
+        rerror("End index out of bounds!");
+    }
+
+    if (start->data.number > end->data.number) {
+        rerror("Start index must be less than or equal to end index!");
+    }
+
+    new_array(s);
+    for (size_t i = 0; i < arr.len; i++) {
+        if (i < start->data.number || i > end->data.number) {
+            push(s, arr.data[i]);
+        }
+    }
+    end_array(s);
+
+    free(arr.data);
+    free(array);
+}
