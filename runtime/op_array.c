@@ -826,58 +826,45 @@ void keep(stack *s) {
     end_array(s);
 }
 
-// Find the occurences of one array in another
+// Find the occurrences of one array in another
+// Takes two arguments.
+// First argument is an array or scalar of values to find.
+// Second argument is an array to search in.
+// If you want to search for an array in an array, you have to put it into an array like this: [[1 2 3]]
 // example 1:
 //   [1 8 5 2 3 5 4 5 6 7] 5 find  ->  [0 0 1 0 0 1 0 1 0 0]
 // example 2:
 //   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
-//
-// first arg is the array to search in
-// second arg is the array OR scalar to search for
 void find(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
+    elem *find = pop(s);
 
-    if (a->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(a->type));
+    elem *in = pop(s);
+    if (in->type != ARRAY) {
+        rerror("The second argument to find needs to be an array!");
     }
 
-    arr array_a = a->data.array;
-
-    if (b->type == ARRAY) {
-        arr array_b = b->data.array;
-
+    if (find->type == ARRAY) {
         new_array(s);
-        for (size_t i = 0; i < array_a.len; i++) {
-            bool found = true;
-            for (size_t j = i; j < array_a.len; j++) {
-                size_t wb = j - i;
-                if (wb >= array_b.len) {
-                    break;
-                }
-                if (!elems_equal(array_a.data[j], array_b.data[wb])) {
-                    found = false;
+        for (size_t i = 0; i < in->data.array.len; i ++) {
+            bool any = false;
+            elem *e = in->data.array.data[i];
+            for (size_t j = 0; j < find->data.array.len; j ++) {
+                if (elems_equal(e, find->data.array.data[j])) {
+                    any = true;
                     break;
                 }
             }
-            if (found) {
-                push_bool(s, true);
-                for (size_t j = 1; j < array_b.len; j++) {
-                    push_bool(s, false);
-                }
-                i += array_b.len - 1;
-            } else {
-                push_bool(s, false);
-            }
+            push_bool(s, any);
         }
         end_array(s);
-    } else {
-        new_array(s);
-        for (size_t i = 0; i < array_a.len; i++) {
-            push_bool(s, elems_equal(array_a.data[i], b));
-        }
-        end_array(s);
+        return;
     }
+
+    new_array(s);
+    for (size_t i = 0; i < in->data.array.len; i ++) {
+        push_bool(s, elems_equal(find, in->data.array.data[i]));
+    }
+    end_array(s);
 }
 
 // Combine two arrays OR scalars as rows of a new array

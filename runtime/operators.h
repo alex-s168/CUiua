@@ -139,7 +139,11 @@ void dip(stack *s);
 // Takes two arrays. The first array is the number of copies to keep of each row of the second array.
 void keep(stack *s);
 
-// Find the occurences of one array in another
+// Find the occurrences of one array in another
+// Takes two arguments.
+// First argument is an array or scalar of values to find.
+// Second argument is an array to search in.
+// If you want to search for an array in an array, you have to put it into an array like this: [[1 2 3]]
 // example 1:
 //   [1 8 5 2 3 5 4 5 6 7] 5 find  ->  [0 0 1 0 0 1 0 1 0 0]
 // example 2:

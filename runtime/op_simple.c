@@ -292,22 +292,34 @@ void negate(stack *s) {
 void eq(stack *s) {
     elem *b = pop(s);
     elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Equals operator can only be used on numbers!");
+    if (a->type == NUMBER && b->type == NUMBER) {
+        a->data.number = (a->data.number == b->data.number);
+        a->f_bool = true;
+        return;
     }
-    a->data.number = (a->data.number == b->data.number);
-    a->f_bool = true;
+    if (a->type == TYPE && b->type == TYPE) {
+        a->data.number = (a->data.type == b->data.type);
+        a->f_bool = true;
+        return;
+    }
+    rerror("Equals operator can only be used on numbers and types!");
 }
 
 // checks if top two elements on the stack are not equal
 void neq(stack *s) {
     elem *b = pop(s);
     elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Not equals operator can only be used on numbers!");
+    if (a->type == NUMBER && b->type == NUMBER) {
+        a->data.number = (a->data.number != b->data.number);
+        a->f_bool = true;
+        return;
     }
-    a->data.number = (a->data.number != b->data.number);
-    a->f_bool = true;
+    if (a->type == TYPE && b->type == TYPE) {
+        a->data.number = (a->data.type != b->data.type);
+        a->f_bool = true;
+        return;
+    }
+    rerror("Not equals operator can only be used on numbers and types!");
 }
 
 // checks if top two elements on the stack are less than
