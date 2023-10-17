@@ -1086,41 +1086,42 @@ void split_op(stack *s) {
 
 // applies a function to each possible combination of two arrays
 // example:
-//   [1 2 3] [9 2 9 5] table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
+//   [1 2 3] [9 2 9 5] (+) table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
 void table(stack *s) {
     elem *f = pop(s);
-    if (f->type != FUNPTR) {
-        rerror("Expected function, got %s!", type_to_str(f->type));
-    }
-
-    elem *b = pop(s);
-    if (b->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(b->type));
+    if (!is_funptr(f)) {
+        rerror("Expected function pointer, got %s!", type_to_str(f->type));
     }
 
     elem *a = pop(s);
-    if (a->type != ARRAY) {
+    if (!is_array(a)) {
         rerror("Expected array, got %s!", type_to_str(a->type));
     }
 
-    arr array_a = a->data.array;
-    arr array_b = b->data.array;
+    elem *b = pop(s);
+    if (!is_array(b)) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_a = e_as_arr(a);
+    arr array_b = e_as_arr(b);
 
     new_array(s);
+
     for (size_t i = 0; i < array_a.len; i++) {
-        new_array(s);
         for (size_t j = 0; j < array_b.len; j++) {
-            push(s, array_a.data[i]);
-            push(s, array_b.data[j]);
+            push(s, eclone(array_a.data[i]));
+            push(s, eclone(array_b.data[j]));
             f->data.ptr(s);
         }
-        end_array(s);
     }
+
     end_array(s);
 
-    free_elem(a);
-    free_elem(b);
-    free_elem(f);
+    free(array_a.data);
+    free(array_b.data);
+    free(a);
+    free(b);
 }
 
 // combines two arrays by grouping each element of one array into a pair with the corresponding element of the other array
@@ -1128,34 +1129,40 @@ void table(stack *s) {
 // example:
 //   [1 2 3] [4 5 6] group  ->  [[1 4] [2 5] [3 6]]
 void group(stack *s) {
-    elem *b = pop(s);
-    if (b->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(b->type));
-    }
-
     elem *a = pop(s);
-    if (a->type != ARRAY) {
+    if (!is_array(a)) {
         rerror("Expected array, got %s!", type_to_str(a->type));
     }
 
-    arr array_a = a->data.array;
-    arr array_b = b->data.array;
+    elem *b = pop(s);
+    if (!is_array(b)) {
+        rerror("Expected array, got %s!", type_to_str(b->type));
+    }
+
+    arr array_a = e_as_arr(a);
+    arr array_b = e_as_arr(b);
 
     new_array(s);
-    for (size_t i = 0; i < array_a.len || i < array_b.len; i++) {
+
+    size_t len = array_a.len > array_b.len ? array_a.len : array_b.len;
+
+    for (size_t i = 0; i < len; i++) {
         new_array(s);
         if (i < array_a.len) {
             push(s, array_a.data[i]);
-        } else {
+        }
+        else {
             push_number(s, 0);
         }
         if (i < array_b.len) {
             push(s, array_b.data[i]);
-        } else {
+        }
+        else {
             push_number(s, 0);
         }
         end_array(s);
     }
+
     end_array(s);
 
     free(array_a.data);
@@ -1167,15 +1174,18 @@ void group(stack *s) {
 // pushes all elements of an array onto the stack
 // if no array is given, it does nothing
 void dearray(stack *s) {
-    elem *e = pop(s);
-    if (e->type != ARRAY) {
-        push(s, e);
+    elem *e = peek(s);
+    if (!is_array(e)) {
         return;
     }
-    arr array = e->data.array;
+    pop(s);
+
+    arr array = e_as_arr(e);
+
     for (size_t i = 0; i < array.len; i++) {
         push(s, array.data[i]);
     }
+
     free(array.data);
     free(e);
 }
@@ -1194,27 +1204,30 @@ void fragment(stack *s) {
     }
 
     elem *array = pop(s);
-    if (array->type != ARRAY) {
+    if (!is_array(array)) {
         rerror("Expected array, got %s!", type_to_str(array->type));
     }
 
-    arr arr = array->data.array;
+    arr arr = e_as_arr(array);
 
-    if (start->data.number >= arr.len) {
+    int nstart = (int) e_as_num(start);
+    int nend = (int) e_as_num(end);
+
+    if (nstart >= arr.len) {
         rerror("Start index out of bounds!");
     }
 
-    if (end->data.number > arr.len) {
+    if (nend >= arr.len) {
         rerror("End index out of bounds!");
     }
 
-    if (start->data.number > end->data.number) {
+    if (nstart > nend) {
         rerror("Start index must be less than or equal to end index!");
     }
 
     new_array(s);
     for (size_t i = 0; i < arr.len; i++) {
-        if (i < start->data.number || i > end->data.number) {
+        if (i < nstart || i > nend) {
             push(s, arr.data[i]);
         }
     }
