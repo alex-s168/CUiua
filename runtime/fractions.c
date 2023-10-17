@@ -134,3 +134,17 @@ fract abs_fract(fract a) {
 double fract_value(fract a) {
     return (double) a.numerator / (double) a.denominator;
 }
+
+bool fract_equals(fract ai, fract bi) {
+    fract a = fract_shorten(ai);
+    fract b = fract_shorten(bi);
+    return a.numerator == b.numerator && a.denominator == b.denominator;
+}
+
+bool fract_less(fract a, fract b) {
+    return a.numerator * b.denominator < b.numerator * a.denominator;
+}
+
+bool fract_less_equals(fract a, fract b) {
+    return a.numerator * b.denominator <= b.numerator * a.denominator;
+}

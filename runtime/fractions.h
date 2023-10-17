@@ -5,6 +5,8 @@
 #ifndef CUIUA_FRACTIONS_H
 #define CUIUA_FRACTIONS_H
 
+#include <stdbool.h>
+
 // fraction
 typedef struct {
     int numerator;
@@ -42,5 +44,11 @@ fract abs_fract(fract a);
 double fract_value(fract a);
 
 fract fract_shorten(fract a);
+
+bool fract_equals(fract a, fract b);
+
+bool fract_less(fract a, fract b);
+
+bool fract_less_equals(fract a, fract b);
 
 #endif //CUIUA_FRACTIONS_H

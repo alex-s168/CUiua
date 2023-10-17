@@ -186,15 +186,17 @@ void negate(stack *s) {
 // checks if top two elements on the stack are equal
 void eq(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type == NUMBER && b->type == NUMBER) {
-        a->data.number = (a->data.number == b->data.number);
-        a->f_bool = true;
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, fract_equals(e_as_fraction(a), e_as_fraction(b)));
         return;
     }
-    if (a->type == TYPE && b->type == TYPE) {
-        a->data.number = (a->data.type == b->data.type);
-        a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) == e_as_num(b)));
+        return;
+    }
+    if (is_type(a) && is_type(b)) {
+        push_bool(s, a->data.type == b->data.type);
         return;
     }
     rerror("Equals operator can only be used on numbers and types!");
@@ -203,15 +205,17 @@ void eq(stack *s) {
 // checks if top two elements on the stack are not equal
 void neq(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type == NUMBER && b->type == NUMBER) {
-        a->data.number = (a->data.number != b->data.number);
-        a->f_bool = true;
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, !fract_equals(e_as_fraction(a), e_as_fraction(b)));
         return;
     }
-    if (a->type == TYPE && b->type == TYPE) {
-        a->data.number = (a->data.type != b->data.type);
-        a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) != e_as_num(b)));
+        return;
+    }
+    if (is_type(a) && is_type(b)) {
+        push_bool(s, a->data.type != b->data.type);
         return;
     }
     rerror("Not equals operator can only be used on numbers and types!");
@@ -220,90 +224,112 @@ void neq(stack *s) {
 // checks if top two elements on the stack are less than
 void lt(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Less than operator can only be used on numbers!");
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, fract_less(e_as_fraction(a), e_as_fraction(b)));
+        return;
     }
-    a->data.number = (a->data.number < b->data.number);
-    a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) < e_as_num(b)));
+        return;
+    }
+    rerror("Less than operator can only be used on numbers!");
 }
 
 // checks if top two elements on the stack are less than or equal to
 void lte(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Less than or equals operator can only be used on numbers!");
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, fract_less_equals(e_as_fraction(a), e_as_fraction(b)));
+        return;
     }
-    a->data.number = (a->data.number <= b->data.number);
-    a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) <= e_as_num(b)));
+        return;
+    }
+    rerror("Less than or equals operator can only be used on numbers!");
 }
 
 // checks if top two elements on the stack are greater than
 void gt(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Greater than operator can only be used on numbers!");
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, fract_less(e_as_fraction(b), e_as_fraction(a)));
+        return;
     }
-    a->data.number = (a->data.number > b->data.number);
-    a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) > e_as_num(b)));
+        return;
+    }
+    rerror("Greater than operator can only be used on numbers!");
 }
 
 // checks if top two elements on the stack are greater than or equal to
 void gte(stack *s) {
     elem *b = pop(s);
-    elem *a = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
-        rerror("Greater than or equals operator can only be used on numbers!");
+    elem *a = pop(s);
+    if (is_fraction(a) && is_fraction(b)) {
+        push_bool(s, fract_less_equals(e_as_fraction(b), e_as_fraction(a)));
+        return;
     }
-    a->data.number = (a->data.number >= b->data.number);
-    a->f_bool = true;
+    if (is_numeric(a) && is_numeric(b)) {
+        push_bool(s, (e_as_num(a) >= e_as_num(b)));
+        return;
+    }
+    rerror("Greater than or equals operator can only be used on numbers!");
 }
 
 // throws an error if the top element on the stack is not true
 void assert(stack *s) {
     elem *e = pop(s);
-    if (e->type != NUMBER || e->data.number != true) {
+    if (!is_bool(e) || !e_as_bool(e)) {
         rerror("Assertion error!");
     }
 }
 
 // max of two elements
 void max_op(stack *s) {
-    elem *a = pop(s);
-    elem *b = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
+    elem *ae = pop(s);
+    elem *be = pop(s);
+    if (!(is_numeric(ae) && is_numeric(be))) {
         rerror("Max operator can only be used on numbers!");
     }
-    if (a->data.number > b->data.number) {
-        b->data.number = a->data.number;
+    double a = e_as_num(ae);
+    double b = e_as_num(be);
+    if (a > b) {
+        push_number(s, a);
+    } else {
+        push_number(s, b);
     }
-    free_elem(a);
 }
 
 // min of two elements
 void min_op(stack *s) {
-    elem *a = pop(s);
-    elem *b = peek(s);
-    if (a->type != NUMBER || b->type != NUMBER) {
+    elem *ae = pop(s);
+    elem *be = pop(s);
+    if (!(is_numeric(ae) && is_numeric(be))) {
         rerror("Min operator can only be used on numbers!");
     }
-    if (a->data.number < b->data.number) {
-        b->data.number = a->data.number;
+    double a = e_as_num(ae);
+    double b = e_as_num(be);
+    if (a < b) {
+        push_number(s, a);
+    } else {
+        push_number(s, b);
     }
-    free_elem(a);
 }
 
 // call two functions on two elements
 void bracket(stack *s) {
     elem *f1 = pop(s);
-    if (f1->type != FUNPTR) {
+    if (!is_funptr(f1)) {
         rerror("Expected function, got %s!", type_to_str(f1->type));
     }
 
     elem *f2 = pop(s);
-    if (f2->type != FUNPTR) {
+    if (!is_funptr(f2)) {
         rerror("Expected function, got %s!", type_to_str(f2->type));
     }
 
@@ -311,10 +337,10 @@ void bracket(stack *s) {
     elem *a = pop(s);
 
     push(s, a);
-    f1->data.ptr(s);
+    e_as_funptr(f1)(s);
 
     push(s, b);
-    f2->data.ptr(s);
+    e_as_funptr(f2)(s);
 }
 
 // reads all text from a file into a single string
