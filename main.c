@@ -442,8 +442,16 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  cast_string(s);\n");
             continue;
         }
+        UC(curr, "ℚ") {
+            fprintf(main, "  cast_fraction(s);\n");
+            continue;
+        }
         UC(curr, "⑀") {
             fprintf(main, "  makefract(s);\n");
+            continue;
+        }
+        UC(curr, "acc") { // TODO: find symbol
+            fprintf(main, "  accuracy(s);\n");
             continue;
         }
         switch (code[i]) {

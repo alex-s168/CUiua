@@ -364,61 +364,83 @@ void write_file(stack *s) {
     free(str1);
 }
 
+// for fractions:
+//   converts it to an integer (equals to cast real and then floor)
 // for numbers:
 //   converts it to an integer (equals to floor)
 // for strings:
-//   parses the string as an integer (equals to real and then floor)
+//   parses the string as a integer (equals to real and then floor)
 void cast_integer(stack *s) {
-    elem *e = peek(s);
-
-    if (e->type == NUMBER) {
-        e->data.number = (int) e->data.number;
+    elem *e = pop(s);
+    if (is_numeric(e)) {
+        push_number(s, floor(e_as_num(e)));
         return;
     }
-
-    if (e->type == ARRAY) {
-        char *str = arr_to_str(e->data.array);
-        e->data.number = (double) atoi(str);
-        e->type = NUMBER;
+    if (is_fraction(e)) {
+        push_number(s, floor(fract_value(e_as_fraction(e))));
         return;
     }
-
-    rerror("Invalid type for cast_integer!");
+    if (is_string(e)) {
+        char *x;
+        push_number(s, floor(strtod(e_as_str(e), &x)));
+        return;
+    }
+    rerror("Cannot cast %s to integer!", type_to_str(e->type));
 }
 
+// for fractions:
+//   error
 // for numbers:
 //   converts it to a string (negative sign gets appended in front of the string if the number is negative
 // for strings:
 //   does nothing
 void cast_string(stack *s) {
-    elem *e = peek(s);
-    char *str = etostra(e, false);
-    e->data.array = str_to_arr(str);
-    e->type = ARRAY;
-    e->f_bool = false;
-    e->f_char = false;
-    free(str);
+    elem *e = pop(s);
+    push_string(s, etostra(e, false));
 }
 
+// for fractions:
+//   converts it to a real number
 // for numbers:
 //   does nothing
 // for strings:
 //   parses the string as a number
 void cast_real(stack *s) {
-    elem *e = peek(s);
-
-    if (e->type == NUMBER) {
+    elem *e = pop(s);
+    if (is_numeric(e)) {
+        push_number(s, e_as_num(e));
         return;
     }
-
-    if (e->type == ARRAY) {
-        char *str = arr_to_str(e->data.array);
-        e->data.number = atof(str);
-        e->type = NUMBER;
+    if (is_fraction(e)) {
+        push_number(s, fract_value(e_as_fraction(e)));
         return;
     }
+    if (is_string(e)) {
+        char *x;
+        push_number(s, strtod(e_as_str(e), &x));
+        return;
+    }
+    rerror("Cannot cast %s to real!", type_to_str(e->type));
+}
 
-    rerror("Invalid type for cast_real!");
+// (ℝ)
+// for numbers:
+//   converts it to a fraction
+// for strings:
+//   error
+// for fraction-like things:
+//   converts it to a fraction
+void cast_fraction(stack *s) {
+    elem *e = pop(s);
+    if (is_fraction(e)) {
+        push(s, e_from_fraction(fract_shorten(e_as_fraction(e))));
+        return;
+    }
+    if (is_numeric(e)) {
+        push(s, e_from_fraction(to_fraction(e_as_num(e))));
+        return;
+    }
+    rerror("Cannot cast %s to fraction!", type_to_str(e->type));
 }
 
 // [numerator] [denominator] fraction  ->  [numerator/denominator]
@@ -433,4 +455,31 @@ void makefract(stack *s) {
     free_elem(denom);
     free_elem(num);
     push(s, e_from_fraction(f));
+}
+
+// returns the accuracy (in decimal places) of a number (or fraction) to another number (or fraction)
+// [number] [other] accuracy  ->  [accuracy]
+void accuracy(stack *s) {
+    elem *other = pop(s);
+    elem *num = pop(s);
+
+    if (is_numeric(num) && is_numeric(other)) {
+        // calculate accuracy of number to other
+        double n = e_as_num(num);
+        double o = e_as_num(other);
+        if (n == o) {
+            push_number(s, 0);
+            return;
+        }
+        double diff = fabs(n - o);
+        int acc = 0;
+        while (diff < 1) {
+            diff *= 10;
+            acc++;
+        }
+        push_number(s, acc);
+        return;
+    }
+
+    rerror("Cannot calculate accuracy of %s to %s!", type_to_str(num->type), type_to_str(other->type));
 }

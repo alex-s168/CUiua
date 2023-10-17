@@ -24,14 +24,14 @@ fract to_fraction(double d) {
     fract f;
     f.numerator = 1;
     f.denominator = 1;
-    f.accuracy = 0;
+    f.accuracy = 1;
     double error = fabs(d - fract_value(f));
-    for (int i = 1; i < 100; i++) {
-        for (int j = 1; j < 100; j++) {
+    for (int i = 1; i < 1000; i++) {
+        for (int j = 1; j < 1000; j++) {
             fract f2;
             f2.numerator = i;
             f2.denominator = j;
-            f2.accuracy = 0;
+            f2.accuracy = 1;
             double error2 = fabs(d - fract_value(f2));
             if (error2 < error) {
                 f = f2;

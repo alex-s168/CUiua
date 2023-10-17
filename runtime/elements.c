@@ -269,6 +269,9 @@ bool elems_equal(elem *a, elem *b) {
 elem *eclone(elem *e) {
     elem *clone = new_elem(e->type);
     switch (e->type) {
+        case FRACTION:
+            clone->data.fraction = e->data.fraction;
+            break;
         case BOXED:
             clone->data.boxed = eclone(e->data.boxed);
             break;
