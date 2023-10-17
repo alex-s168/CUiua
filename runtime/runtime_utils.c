@@ -11,7 +11,6 @@
 #else
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #endif
 
 void rerror(char *fmt, ...) {
@@ -118,37 +117,4 @@ iarr arr_to_iarr(arr a) {
         ia.data[i] = (int) a.data[i]->data.number;
     }
     return ia;
-}
-
-bool is_positive_int(elem *e) {
-    return e->type == NUMBER && e->data.number == (int) e->data.number && e->data.number >= 0;
-}
-
-char *arr_to_str(arr a) {
-    iarr ia = arr_to_iarr(a);
-    char *str = malloc(ia.len + 1);
-    if (str == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < ia.len; i++) {
-        str[i] = (char) ia.data[i];
-    }
-    str[ia.len] = '\0';
-    iarr_free(ia);
-    return str;
-}
-
-arr str_to_arr(char *str) {
-    size_t len = strlen(str);
-    elem **data = malloc(len * sizeof(elem *));
-    if (data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < len; i++) {
-        elem *e = new_elem(NUMBER);
-        e->data.number = str[i];
-        e->f_char = true;
-        data[i] = e;
-    }
-    return (arr) { .len = len, .data = data };
 }

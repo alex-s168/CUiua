@@ -273,4 +273,7 @@ void cast_real(stack *s);
 // rotates the shape of an array
 void transpose(stack *s);
 
+// [numerator] [denominator] fraction  ->  [numerator/denominator]
+void makefract(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

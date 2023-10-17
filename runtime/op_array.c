@@ -1185,11 +1185,11 @@ void dearray(stack *s) {
 //   [3 9 2 1 6] 1 3 fragment  ->  [3 6]
 void fragment(stack *s) {
     elem *end = pop(s);
-    if (!is_positive_int(end)) {
+    if (!is_positive_index(end)) {
         rerror("Expected positive integer, got %s!", type_to_str(end->type));
     }
     elem *start = pop(s);
-    if (!is_positive_int(start)) {
+    if (!is_positive_index(start)) {
         rerror("Expected positive integer, got %s!", type_to_str(start->type));
     }
 

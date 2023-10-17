@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "utils.h"
+#include "fractions.h"
 
 // runtime error
 void rerror(char *fmt, ...);
@@ -31,7 +32,8 @@ typedef enum {
     ARRAY,
     FUNPTR,
     TYPE,
-    BOXED
+    BOXED,
+    FRACTION
 } elem_type;
 
 char *type_to_str(elem_type type);
@@ -43,6 +45,7 @@ struct elem {
         funptr ptr;
         elem_type type;
         elem *boxed;
+        fract fraction;
     } data;
     elem_type type;
 
@@ -140,6 +143,79 @@ char *arr_to_str(arr a);
 
 arr str_to_arr(char *str);
 
-bool is_positive_int(elem *e);
+bool is_positive_index(elem *e);
+
+
+
+// does the element represent a number / is it a number?
+bool is_numeric(elem *e);
+
+// is the element an array?
+bool is_array(elem *e);
+
+// is the element a function pointer?
+bool is_funptr(elem *e);
+
+// is the element a boxed element?
+bool is_boxed(elem *e);
+
+// is the element a boolean?
+bool is_bool(elem *e);
+
+// is the element a character?
+bool is_char(elem *e);
+
+// is the element a string?
+bool is_string(elem *e);
+
+// is the element a type?
+bool is_type(elem *e);
+
+// is the element a fraction?
+bool is_fraction(elem *e);
+
+
+
+// gets the numeric value of an element
+double e_as_num(elem *e);
+
+// gets the boolean value of an element
+bool e_as_bool(elem *e);
+
+// gets the character value of an element
+char e_as_char(elem *e);
+
+// gets the string value of an element
+char *e_as_str(elem *e);
+
+// gets the array value of an element
+arr e_as_arr(elem *e);
+
+// gets the function pointer value of an element
+funptr e_as_funptr(elem *e);
+
+// gets the fraction value of an element
+fract e_as_fraction(elem *e);
+
+
+elem *e_from_num(double num);
+
+elem *e_from_bool(bool b);
+
+elem *e_from_char(char c);
+
+elem *e_from_str(char *str);
+
+elem *e_from_arr(arr array);
+
+elem *e_from_funptr(funptr ptr);
+
+elem *e_from_fraction(fract fraction);
+
+elem *e_from_type(elem_type type);
+
+elem *e_from_boxed(elem *e);
+
+elem *e_from_iarr(iarr array);
 
 #endif //CUIUA_RUNTIME_H
