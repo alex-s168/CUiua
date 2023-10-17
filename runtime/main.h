@@ -71,6 +71,9 @@ elem *new_elem(elem_type type);
 // frees a element
 void free_elem(elem *e);
 
+// copies a element into another one
+void copy_elem(elem *dest, elem *src);
+
 // starts a array literal
 void new_array(stack *s);
 
@@ -102,6 +105,14 @@ bool has_next(stack *s);
 
 // pops a element from the stack
 elem *pop(stack *s);
+
+elem *pop_f(stack *s);
+
+// reserves space for n elements
+void sreserve(stack *s, size_t size);
+
+// debug function
+void stack_realloc(stack *s, size_t size);
 
 // peeks at the top element on the stack
 elem *peek(stack *s);

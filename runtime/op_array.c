@@ -615,23 +615,32 @@ void first(stack *s) {
 // makes an array of all natural numbers from 0 to n
 void range(stack *s) {
     elem *e = pop(s);
-    if (e->type != NUMBER || round(e->data.number) != e->data.number || e->data.number < 0) {
-        rerror("The argument to range needs to be a positive integer!");
+    if (!is_positive_index(e)) {
+        rerror("The argument to range needs to be a number!");
     }
-    size_t n = (size_t) e->data.number;
+    size_t n = (size_t) e_as_num(e);
+
     arr array;
     array.len = n;
-    array.data = malloc(array.len * sizeof(elem *));
-    if (array.data == NULL) {
+
+    size_t off_into_alloc = sizeof(elem *) * n;
+    void *alloc = malloc(off_into_alloc + sizeof(elem) * (n+1));
+
+    array.data = (elem **) alloc;
+
+    elem *data = (elem *) (alloc + off_into_alloc);
+    if (data == NULL) {
         rerror("Out of memory!");
     }
-    for (size_t i = 0; i < array.len; i++) {
-        elem *e2 = new_elem(NUMBER);
-        e2->data.number = i;
-        array.data[i] = e2;
+
+    for (size_t i = 0; i < n; i++) {
+        data[i].type = NUMBER;
+        data[i].data.number = i;
+        array.data[i] = &data[i];
     }
-    free_elem(e);
-    elem *e2 = new_elem(ARRAY);
+
+    elem *e2 = data + n;
+    e2->type = ARRAY;
     e2->data.array = array;
     push(s, e2);
 }
@@ -943,31 +952,30 @@ void distribute(stack *s) {
 // Apply a reducing function to an array
 void reduce(stack *s) {
     elem *f = pop(s);
-    elem *b = pop(s);
-
-    if (f->type != FUNPTR) {
-        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    if (!is_funptr(f)) {
+        rerror("Expected function, got %s!", type_to_str(f->type));
     }
 
-    if (b->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(b->type));
+    elem *a = pop(s);
+    if (!is_array(a)) {
+        rerror("Expected array, got %s!", type_to_str(a->type));
     }
 
-    arr array_b = b->data.array;
+    arr array = e_as_arr(a);
 
-    if (array_b.len == 0) {
+    if (array.len == 0) {
         rerror("Cannot reduce empty array!");
     }
 
-    elem *e = eclone(array_b.data[0]);
-    for (size_t i = 1; i < array_b.len; i++) {
-        push(s, e);
-        push(s, array_b.data[i]);
+    elem *e = array.data[0];
+    push(s, e);
+    for (size_t i = 1; i < array.len; i++) {
+        push(s, array.data[i]);
         f->data.ptr(s);
-        e = pop(s);
     }
+    e = pop_f(s);
 
-    free_elem(b);
+    free_elem(a);
     free_elem(f);
     push(s, e);
 }
@@ -1110,8 +1118,8 @@ void table(stack *s) {
 
     for (size_t i = 0; i < array_a.len; i++) {
         for (size_t j = 0; j < array_b.len; j++) {
-            push(s, eclone(array_a.data[i]));
-            push(s, eclone(array_b.data[j]));
+            push(s, array_a.data[i]);
+            push(s, array_b.data[j]);
             f->data.ptr(s);
         }
     }

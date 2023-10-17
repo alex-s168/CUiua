@@ -29,28 +29,57 @@ void sfree(stack *s) {
 void push(stack *s, elem *e) {
     if (s->nextpos >= s->alloc) {
         s->alloc *= 2;
-        elem **new = realloc(s->data, sizeof(elem *) * s->alloc);
+        size_t all = s->alloc;
+        elem **new = realloc(s->data, sizeof(elem *) * all);
         if (new == NULL) {
             rerror("Out of memory!");
         }
         s->data = new;
+#ifdef STACK_DEBUG
+        stack_realloc(s, all);
+#endif
     }
     s->data[s->nextpos++] = e;
 }
 
-elem *pop(stack *s) {
+elem *pop_f(stack *s) {
     if (s->nextpos == 0) {
         rerror("Stack underflow!");
     }
     if (s->nextpos <= s->alloc / 2 && s->alloc > 10) {
         s->alloc /= 2;
-        elem **new = realloc(s->data, sizeof(elem *) * s->alloc);
+        size_t all = s->alloc;
+
+        elem **new = realloc(s->data, sizeof(elem *) * all);
         if (new == NULL) {
             rerror("Out of memory!");
         }
         s->data = new;
+#ifdef STACK_DEBUG
+        stack_realloc(s, all);
+#endif
     }
     return s->data[--s->nextpos];
+}
+
+elem *pop(stack *s) {
+    return eclone(pop_f(s)); // TODO: figure out why this is needed
+}
+
+// reserves space for n elements
+void sreserve(stack *s, size_t size) {
+    size_t newsize = s->alloc + size;
+    if (newsize > s->alloc) {
+        elem **new = realloc(s->data, sizeof(elem *) * newsize);
+        if (new == NULL) {
+            rerror("Out of memory!");
+        }
+        s->data = new;
+        s->alloc = newsize;
+#ifdef STACK_DEBUG
+        stack_realloc(s, newsize);
+#endif
+    }
 }
 
 void push_number(stack *s, double number) {

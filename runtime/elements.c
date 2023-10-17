@@ -24,15 +24,15 @@ elem *new_elem(elem_type type) {
     return e;
 }
 
+// assumes that every array uses one single memory allocation for all the elements and itself.
+// This allocation is starting at array.data
 void free_elem(elem *e) {
     if (e == NULL) {
         return;
     }
     if (e->type == ARRAY) {
-        for (size_t i = 0; i < e->data.array.len; i++) {
-            free_elem(e->data.array.data[i]);
-        }
         free(e->data.array.data);
+        return;
     }
     if (e->type == BOXED) {
         free_elem(e->data.boxed);
@@ -570,4 +570,9 @@ bool is_positive_index(elem *e) {
     }
     double num = e_as_num(e);
     return num >= 0 && num == floor(num);
+}
+
+// copies a element into another one
+void copy_elem(elem *dest, elem *src) {
+    memcpy(dest, src, sizeof(elem));
 }

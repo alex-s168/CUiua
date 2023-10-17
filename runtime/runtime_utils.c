@@ -118,3 +118,7 @@ iarr arr_to_iarr(arr a) {
     }
     return ia;
 }
+
+void stack_realloc(stack *s, size_t size) {
+    printf("reallocating stack to %zu\n", size);
+}
