@@ -70,6 +70,7 @@ static elem *combine_simple_two_numbers(
         return e_from_arr(a_array);
     }
     rerror("Invalid types for operator!");
+    return NULL;
 }
 
 static double add_d2(double a, double b) {

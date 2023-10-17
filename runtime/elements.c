@@ -269,18 +269,24 @@ bool elems_equal(elem *a, elem *b) {
 elem *eclone(elem *e) {
     elem *clone = new_elem(e->type);
     switch (e->type) {
-        case FRACTION:
+        case FRACTION: {
             clone->data.fraction = e->data.fraction;
-            break;
-        case BOXED:
+        }
+        break;
+
+        case BOXED: {
             clone->data.boxed = eclone(e->data.boxed);
-            break;
-        case NUMBER:
+        }
+        break;
+
+        case NUMBER: {
             clone->data.number = e->data.number;
             clone->f_bool = e->f_bool;
             clone->f_char = e->f_char;
-            break;
-        case ARRAY:
+        }
+        break;
+
+        case ARRAY: {
             size_t len = e->data.array.len;
             clone->data.array.len = len;
             clone->data.array.data = malloc(sizeof(elem *) * len);
@@ -290,12 +296,18 @@ elem *eclone(elem *e) {
             for (size_t i = 0; i < len; i++) {
                 clone->data.array.data[i] = eclone(e->data.array.data[i]);
             }
-            break;
-        case FUNPTR:
+        }
+        break;
+
+        case FUNPTR: {
             clone->data.ptr = e->data.ptr;
-            break;
-        default:
+        }
+        break;
+
+        default: {
             rerror("Unknown element type %d", e->type);
+        }
+        break;
     }
     return clone;
 }
@@ -423,6 +435,7 @@ arr e_as_arr(elem *e) {
         };
     }
     rerror("Cannot convert element to array!");
+    return (arr) {0};
 }
 
 // gets the function pointer value of an element
@@ -459,6 +472,7 @@ fract e_as_fraction(elem *e) {
         };
     }
     rerror("Cannot convert element to fraction!");
+    return (fract) {0};
 }
 
 elem *e_from_num(double num) {

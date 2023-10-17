@@ -969,9 +969,10 @@ void reduce(stack *s) {
 
     elem *e = array.data[0];
     push(s, e);
+    funptr fptr = f->data.ptr;
     for (size_t i = 1; i < array.len; i++) {
         push(s, array.data[i]);
-        f->data.ptr(s);
+        fptr(s);
     }
     e = pop_f(s);
 
