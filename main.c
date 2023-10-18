@@ -525,7 +525,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 break;
             }
             case ';': {
-                fprintf(main, "  pop(s);\n");
+                fprintf(main, "  pop_f(s);\n");
                 break;
             }
             case '.': {

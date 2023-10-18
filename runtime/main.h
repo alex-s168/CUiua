@@ -59,6 +59,21 @@ struct stack{
     size_t alloc;
 };
 
+// adds an element to the cleanup list
+// do not call with an element pointer. first call alloc_address_e()
+void add_for_cleanup(void *e);
+
+// cleans all the elements in the cleanup list
+void cleanup();
+
+// frees a pointer
+// if it is in the cleanup list it will be removed
+void freex(void *e);
+
+// returns the allocation address of an element
+// DO NOT USE THIS FUNCTION OUTSIDE THE RUNTIME
+void *alloc_address_e(elem *e);
+
 // initializes the runtime
 void initrt();
 
@@ -79,9 +94,6 @@ void new_array(stack *s);
 
 // ends a array literal
 void end_array(stack *s);
-
-// ends a array literal (reverses array)
-void end_array_rev(stack *s);
 
 // pushes a array onto the stack
 void push_array(stack *s, arr array);
@@ -144,9 +156,14 @@ char *etostra(elem *e, bool negative_sign_right);
 // prints the whole stack
 void sdump(stack *s);
 
+// checks if two elements are equal
 bool elems_equal(elem *a, elem *b);
 
+// deep-clones an element
 elem *eclone(elem *e);
+
+// deep-clones an element into a memory location
+void eclone_into(elem *dest, elem *src);
 
 iarr arr_to_iarr(arr a);
 

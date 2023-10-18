@@ -9,4 +9,5 @@ cat "$1" | ./cuiua > out.c
 
 gcc out.c runtime.a -o out -lm
 
+echo "started"
 time ./out

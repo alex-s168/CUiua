@@ -59,11 +59,13 @@ elem *pop_f(stack *s) {
         stack_realloc(s, all);
 #endif
     }
-    return s->data[--s->nextpos];
+    elem *e = s->data[--s->nextpos];
+    // add_for_cleanup(e); // TODO: why segfault?
+    return e;
 }
 
 elem *pop(stack *s) {
-    return eclone(pop_f(s)); // TODO: figure out why this is needed
+    return eclone(pop_f(s));
 }
 
 // reserves space for n elements
@@ -124,15 +126,15 @@ void dup(stack *s) {
 }
 
 void swap(stack *s) {
-    elem *a = pop(s);
-    elem *b = pop(s);
+    elem *a = pop_f(s);
+    elem *b = pop_f(s);
     push(s, a);
     push(s, b);
 }
 
 void over(stack *s) {
-    elem *a = pop(s);
-    elem *b = pop(s);
+    elem *a = pop_f(s);
+    elem *b = pop_f(s);
     push(s, b);
     push(s, a);
     push(s, eclone(b));

@@ -11,6 +11,7 @@
 #else
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #endif
 
 void rerror(char *fmt, ...) {
@@ -23,10 +24,55 @@ void rerror(char *fmt, ...) {
     exit(1);
 }
 
+void **cleanup_list;
+size_t cleanup_list_len = 0;
+size_t cleanup_list_alloc = 8;
+
 stack array_builder_stack;
+
+void add_for_cleanup(void *e) {
+    for (size_t i = 0; i < cleanup_list_len; i++) {
+        if (cleanup_list[i] == e) {
+            return;
+        }
+    }
+    if (cleanup_list_len >= cleanup_list_alloc) {
+        cleanup_list_alloc *= 2;
+        cleanup_list = realloc(cleanup_list, cleanup_list_alloc * sizeof(void *));
+        if (cleanup_list == NULL) {
+            rerror("Out of memory!");
+        }
+    }
+    cleanup_list[cleanup_list_len++] = e;
+}
+
+void cleanup() {
+    for (size_t i = 0; i < cleanup_list_len; i++) {
+        void *e = cleanup_list[i];
+        if (e == NULL) {
+            continue;
+        }
+        free(e);
+    }
+    cleanup_list_len = 0;
+}
+
+// frees a pointer
+// if it is in the cleanup list it will be removed
+void freex(void *e) {
+    for (size_t i = 0; i < cleanup_list_len; i++) {
+        if (cleanup_list[i] == e) {
+            cleanup_list[i] = NULL;
+            break;
+        }
+    }
+    free(e);
+}
 
 void initrt() {
     sinit(&array_builder_stack);
+    srand(time(NULL));
+    cleanup_list = malloc(cleanup_list_alloc);
 }
 
 void stoprt() {
@@ -34,6 +80,8 @@ void stoprt() {
         rerror("Unmatched new_array()!");
     }
     sfree(&array_builder_stack);
+    cleanup();
+    free(cleanup_list);
 }
 
 void new_array(stack *s) {
@@ -61,35 +109,7 @@ void end_array(stack *s) {
         }
         array.len = len;
         for (size_t i = 0; i < len; i++) {
-            array.data[len-1-i] = pop(s);
-        }
-    }
-    e->type = ARRAY;
-    e->data.array = array;
-    push(s, e);
-}
-
-
-// ends the array literal and pushes it onto the stack (reverses array)
-void end_array_rev(stack *s) {
-    if (array_builder_stack.nextpos == 0) {
-        rerror("Unmatched end_array()!");
-    }
-    elem *e = pop(&array_builder_stack);
-    size_t start = (size_t) e->data.number;
-    size_t len = (size_t) (s->nextpos - start);
-    arr array;
-    if (len == 0 || start > s->nextpos) {
-        array.data = NULL;
-        array.len = 0;
-    } else {
-        array.data = malloc(len * sizeof(elem *));
-        if (array.data == NULL) {
-            rerror("Out of memory!");
-        }
-        array.len = len;
-        for (size_t i = 0; i < len; i++) {
-            array.data[i - 1] = pop(s);
+            array.data[len-1-i] = pop_f(s);
         }
     }
     e->type = ARRAY;
