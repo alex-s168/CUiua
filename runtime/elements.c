@@ -265,6 +265,46 @@ bool elems_equal(elem *a, elem *b) {
     }
 }
 
+// deep-clones an element into a memory location
+void eclone_into(elem *dest, elem *src) {
+    dest->type = src->type;
+    switch (e->type) {
+        case FRACTION: {
+            dest->data.fraction = src->data.fraction;
+        }
+        break;
+
+        case BOXED: {
+            dest->data.boxed = eclone(src->data.boxed);
+        }
+        break;
+
+        case NUMBER: {
+            dest->data.number = src->data.number;
+            dest->f_bool = src->f_bool;
+            dest->f_char = src->f_char;
+        }
+        break;
+
+        case ARRAY: {
+            dest->data.array.len = src->data.array.len;
+
+            void *data = malloc(sizeof(elem *) * src->data.array.len);
+        }
+        break;
+
+        case FUNPTR: {
+            dest->data.ptr = e->data.ptr;
+        }
+        break;
+
+        default: {
+            rerror("Unknown element type %d", e->type);
+        }
+        break;
+    }
+}
+
 // deep-clones an element
 elem *eclone(elem *e) {
     elem *clone = new_elem(e->type);

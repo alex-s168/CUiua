@@ -82,7 +82,7 @@ static fract add_d1f1(double a, fract b) {
 }
 
 void add(stack *s) {
-    elem *b = pop(s);
+    elem *b = pop_f(s);
     elem *a = peek(s);
     elem *e = combine_simple_two_numbers(a, b,
                                          add_fract, add_d2,
@@ -96,7 +96,7 @@ static double sub_d2(double a, double b) {
 }
 
 void sub(stack *s) {
-    elem *b = pop(s);
+    elem *b = pop_f(s);
     elem *a = peek(s);
     elem *e = combine_simple_two_numbers(a, b,
                                          sub_fract, sub_d2,
@@ -114,7 +114,7 @@ static fract mul_d1f1(double a, fract b) {
 }
 
 void mul(stack *s) {
-    elem *b = pop(s);
+    elem *b = pop_f(s);
     elem *a = peek(s);
     elem *e = combine_simple_two_numbers(a, b,
                                          mul_fract, mul_d2,
@@ -128,7 +128,7 @@ static double div_d2(double a, double b) {
 }
 
 void div_op(stack *s) {
-    elem *b = pop(s);
+    elem *b = pop_f(s);
     elem *a = peek(s);
     elem *e = combine_simple_two_numbers(a, b,
                                          div_fract, div_d2,
