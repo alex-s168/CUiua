@@ -112,7 +112,9 @@ void stoprt() {
         rerror("Unmatched new_array()!");
     }
     sfree(&array_builder_stack);
+#ifndef NO_CLEANUP
     cleanup();
+#endif
     free(cleanup_list);
 }
 

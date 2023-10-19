@@ -22,7 +22,11 @@ void sinit(stack *s) {
 
 void sfree(stack *s) {
     for (size_t i = 0; i < s->nextpos; i++) {
+#ifdef STACK_CLEANUP
+        unused(s->data[i]);
+#else
         free_elem(s->data[i]);
+#endif
     }
     free(s->data);
 }
@@ -131,18 +135,20 @@ void dup(stack *s) {
 }
 
 void swap(stack *s) {
-    elem *a = pop_f(s);
-    elem *b = pop_f(s);
-    push(s, a);
-    push(s, b);
+    if (s->nextpos < 2) {
+        rerror("Stack underflow!");
+    }
+    elem *a = s->data[s->nextpos - 1];
+    elem *b = s->data[s->nextpos - 2];
+    s->data[s->nextpos - 1] = b;
+    s->data[s->nextpos - 2] = a;
 }
 
 void over(stack *s) {
-    elem *a = pop_f(s);
-    elem *b = pop_f(s);
-    push(s, b);
-    push(s, a);
-    push(s, eclone(b));
+    if (s->nextpos < 2) {
+        rerror("Stack underflow!");
+    }
+    push(s, eclone(s->data[s->nextpos - 2]));
 }
 
 bool has_next(stack *s) {

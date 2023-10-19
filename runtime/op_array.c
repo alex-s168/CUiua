@@ -108,19 +108,31 @@ void rev(stack *s) {
     if (a->type != ARRAY) {
         rerror("The argument to rev needs to be an array!");
     }
-    arr array = a->data.array;
+
+    arr orig = a->data.array;
+
+    size_t len = a->data.array.len;
+    size_t off = sizeof(elem) * (len + 1);
+    void *alloc = malloc(off + sizeof(elem *) * len);
+    elem **data = (elem **) (alloc + off);
+    elem *elema = (elem *) (alloc + sizeof(elem));
+
+    for (size_t i = 0; i < len; i++) {
+        data[i] = elema + i;
+        eclone_into(data[i], orig.data[len - 1 - i]);
+    }
+
     arr new_array;
-    new_array.len = array.len;
-    new_array.data = malloc(new_array.len * sizeof(elem *));
-    if (new_array.data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < new_array.len; i++) {
-        new_array.data[i] = array.data[array.len - i - 1];
-    }
-    freex(array.data);
-    a->data.array = new_array;
-    push(s, a);
+    new_array.len = len;
+    new_array.data = data;
+
+    elem *new = (elem *) alloc;
+    new->type = ARRAY;
+    new->data.array = new_array;
+    new->is_alloc = true;
+
+    free_elem(a);
+    push(s, new);
 }
 
 // deshapes an array (makes the array one-dimensional)
@@ -159,6 +171,7 @@ static arr deshape_rec(arr a) {
 }
 
 // uses deshape_rec
+// TODO: investigate why    [[1 2] [1 2] [1 2]] . △ : ♭ : ↯    is broken
 void deshape(stack *s) {
     elem *a = pop(s);
     if (a->type != ARRAY) {
@@ -186,6 +199,7 @@ void match(stack *s) {
 }
 
 // joins two arrays OR scalars end-to-end
+// TODO: rewrite this to be more efficient
 void join(stack *s) {
     elem *b = pop(s);
     elem *a = pop(s);

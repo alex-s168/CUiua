@@ -14,6 +14,12 @@
 // #define FAST_FREE
 
 /* print cleanup debug information */
-#define CLEANUP_DEBUG
+// #define CLEANUP_DEBUG
+
+/* do not cleanup elements */
+// #define NO_CLEANUP
+
+/* instead of freeing each element on the stack, add it to cleanup list */
+// #define STACK_CLEANUP
 
 #endif //CUIUA_CONFIG_H
