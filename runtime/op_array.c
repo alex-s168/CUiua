@@ -38,7 +38,7 @@ void take(stack *s) {
     for (size_t i = 0; i < new_array.len; i++) {
         new_array.data[i] = array.data[i];
     }
-    free(array.data);
+    freex(array.data);
     a->data.array = new_array;
     push(s, a);
     free_elem(n);
@@ -69,7 +69,7 @@ void drop(stack *s) {
     for (size_t i = 0; i < new_array.len; i++) {
         new_array.data[i] = array.data[i + n_int];
     }
-    free(array.data);
+    freex(array.data);
     a->data.array = new_array;
     push(s, a);
     free_elem(n);
@@ -96,7 +96,7 @@ void rot(stack *s) {
     for (size_t i = 0; i < new_array.len; i++) {
         new_array.data[i] = array.data[(i + n_int) % array.len];
     }
-    free(array.data);
+    freex(array.data);
     a->data.array = new_array;
     push(s, a);
     free_elem(n);
@@ -108,19 +108,31 @@ void rev(stack *s) {
     if (a->type != ARRAY) {
         rerror("The argument to rev needs to be an array!");
     }
-    arr array = a->data.array;
+
+    arr orig = a->data.array;
+
+    size_t len = a->data.array.len;
+    size_t off = sizeof(elem) * (len + 1);
+    void *alloc = malloc(off + sizeof(elem *) * len);
+    elem **data = (elem **) (alloc + off);
+    elem *elema = (elem *) (alloc + sizeof(elem));
+
+    for (size_t i = 0; i < len; i++) {
+        data[i] = elema + i;
+        eclone_into(data[i], orig.data[len - 1 - i]);
+    }
+
     arr new_array;
-    new_array.len = array.len;
-    new_array.data = malloc(new_array.len * sizeof(elem *));
-    if (new_array.data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < new_array.len; i++) {
-        new_array.data[i] = array.data[array.len - i - 1];
-    }
-    free(array.data);
-    a->data.array = new_array;
-    push(s, a);
+    new_array.len = len;
+    new_array.data = data;
+
+    elem *new = (elem *) alloc;
+    new->type = ARRAY;
+    new->data.array = new_array;
+    new->is_alloc = true;
+
+    free_elem(a);
+    push(s, new);
 }
 
 // deshapes an array (makes the array one-dimensional)
@@ -144,7 +156,7 @@ static arr deshape_rec(arr a) {
             for (size_t j = 0; j < sub_array.len; j++) {
                 new_array.data[new_array.len - sub_array.len + j] = sub_array.data[j];
             }
-            free(sub_array.data);
+            freex(sub_array.data);
         } else {
             new_array.len++;
             new_array.data = realloc(new_array.data, (new_array.len + 1) * sizeof(elem *));
@@ -154,11 +166,12 @@ static arr deshape_rec(arr a) {
             new_array.data[new_array.len - 1] = a.data[i];
         }
     }
-    free(a.data);
+    freex(a.data);
     return new_array;
 }
 
 // uses deshape_rec
+// TODO: investigate why    [[1 2] [1 2] [1 2]] . △ : ♭ : ↯    is broken
 void deshape(stack *s) {
     elem *a = pop(s);
     if (a->type != ARRAY) {
@@ -186,6 +199,7 @@ void match(stack *s) {
 }
 
 // joins two arrays OR scalars end-to-end
+// TODO: rewrite this to be more efficient
 void join(stack *s) {
     elem *b = pop(s);
     elem *a = pop(s);
@@ -204,8 +218,8 @@ void join(stack *s) {
         for (size_t i = 0; i < array_b.len; i++) {
             new_array.data[array_a.len + i] = array_b.data[i];
         }
-        free(array_a.data);
-        free(array_b.data);
+        freex(array_a.data);
+        freex(array_b.data);
         a->data.array = new_array;
         push(s, a);
     } else if (a->type == ARRAY && b->type != ARRAY) {
@@ -220,7 +234,7 @@ void join(stack *s) {
             new_array.data[i] = array_a.data[i];
         }
         new_array.data[array_a.len] = eclone(b);
-        free(array_a.data);
+        freex(array_a.data);
         a->data.array = new_array;
         push(s, a);
     } else if (a->type != ARRAY && b->type == ARRAY) {
@@ -235,7 +249,7 @@ void join(stack *s) {
         for (size_t i = 0; i < array_b.len; i++) {
             new_array.data[i + 1] = array_b.data[i];
         }
-        free(array_b.data);
+        freex(array_b.data);
         b->data.array = new_array;
         push(s, b);
     } else {
@@ -284,7 +298,7 @@ void select_op(stack *s) {
         }
         new_array.data[i] = eclone(array.data[index]);
     }
-    free(array.data);
+    freex(array.data);
     a->data.array = new_array;
     free_elem(b);
     push(s, a);
@@ -306,7 +320,7 @@ void pick(stack *s) {
         rerror("Index out of bounds!");
     }
     elem *e = array.data[index];
-    free(array.data);
+    freex(array.data);
     a->data.array = array;
     free_elem(b);
     push(s, e);
@@ -435,10 +449,10 @@ static iarr shape_rec(arr a) {
                     rerror("Cannot get shape of array with inconsistent shape!");
                 }
             }
-            free(sub_shape2.data);
+            freex(sub_shape2.data);
         }
         shape = iarr_join(shape, sub_shape);
-        free(sub_shape.data);
+        freex(sub_shape.data);
     }
     return shape;
 }
@@ -463,8 +477,8 @@ void shape(stack *s) {
         e->data.number = shape.data[i];
         new_array.data[i] = e;
     }
-    free(shape.data);
-    free(array.data);
+    freex(shape.data);
+    freex(array.data);
     a->data.array = new_array;
     push(s, a);
 }
@@ -489,30 +503,44 @@ void repeat(stack *s) {
 
 // executes the given function for each element in an array and returns a array of the results
 void each(stack *s) {
-    elem *f = pop(s);
-    if (f->type != FUNPTR) {
+    elem *f = pop_f(s);
+    if (!is_funptr(f)) {
         rerror("The first argument to each needs to be a function pointer!");
     }
-    elem *a = pop(s);
-    if (a->type != ARRAY) {
+
+    elem *a = pop_f(s);
+    if (!is_array(a)) {
         rerror("The second argument to each needs to be an array!");
     }
-    arr array = a->data.array;
-    arr new_array;
-    new_array.len = array.len;
-    new_array.data = malloc(new_array.len * sizeof(elem *));
-    if (new_array.data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < array.len; i++) {
+
+    arr array = e_as_arr(a);
+    __builtin_prefetch(array.data);
+    funptr fun = e_as_funptr(f);
+
+    size_t off = sizeof(elem *) * array.len;
+    void *data = malloc(off + sizeof(elem) * (array.len+1));
+    elem *elema = (elem *) (data + off);
+
+    size_t i = 0;
+    for (; i < array.len; i++) {
         push(s, array.data[i]);
-        f->data.ptr(s);
-        new_array.data[i] = pop(s);
+        fun(s);
+
+        // can't be pop_f because it might free the element (depends on the function)
+        elem *x = pop_f(s);
+        elem *r = elema + i;
+        eclone_into(r, x);
+        ((elem **) data)[i] = r;
     }
-    free(array.data);
-    a->data.array = new_array;
+
+    elem *n = elema + i;
+    n->type = ARRAY;
+    n->data.array.len = array.len;
+    n->data.array.data = (elem **) data;
+
+    push(s, n);
     free_elem(f);
-    push(s, a);
+    free_elem(a);
 }
 
 int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
@@ -587,86 +615,104 @@ void type(stack *s) {
 
 // puts the length of the top element (array) on the stack
 void len(stack *s) {
-    elem *e = pop(s);
-    size_t len = 1;
-    if (e->type == ARRAY) {
-        len = e->data.array.len;
+    elem *e = pop_f(s);
+    if (!is_array(e)) {
+        rerror("The argument to len needs to be an array!");
     }
-    elem *e2 = new_elem(NUMBER);
-    e2->data.number = len;
-    push(s, e2);
+    arr array = e_as_arr(e);
+    push_number(s, array.len);
 }
 
 // gets the first element of an array
 void first(stack *s) {
-    elem *e = pop(s);
-    if (e->type != ARRAY) {
+    elem *e = pop_f(s);
+    if (!is_array(e)) {
         rerror("The argument to first needs to be an array!");
     }
-    arr array = e->data.array;
+    arr array = e_as_arr(e);
     if (array.len == 0) {
         rerror("Cannot get first element of empty array!");
     }
-    push(s, array.data[0]);
-    free(array.data);
-    free(e);
+    elem *e2 = eclone(array.data[0]);
+    push(s, e2);
+    free_elem(e);
 }
 
 // makes an array of all natural numbers from 0 to n
 void range(stack *s) {
     elem *e = pop(s);
-    if (e->type != NUMBER || round(e->data.number) != e->data.number || e->data.number < 0) {
-        rerror("The argument to range needs to be a positive integer!");
+    if (!is_positive_index(e)) {
+        rerror("The argument to range needs to be a number!");
     }
-    size_t n = (size_t) e->data.number;
+    size_t n = (size_t) e_as_num(e);
+
     arr array;
     array.len = n;
-    array.data = malloc(array.len * sizeof(elem *));
-    if (array.data == NULL) {
+
+    size_t off_into_alloc = sizeof(elem *) * n + sizeof(elem);
+    void *alloc = malloc(off_into_alloc + sizeof(elem) * n);
+
+    array.data = (elem **) (alloc + sizeof(elem));
+
+    elem *data = (elem *) (alloc + off_into_alloc);
+    if (data == NULL) {
         rerror("Out of memory!");
     }
-    for (size_t i = 0; i < array.len; i++) {
-        elem *e2 = new_elem(NUMBER);
-        e2->data.number = i;
-        array.data[i] = e2;
+
+    for (size_t i = 0; i < n; i++) {
+        elem *e = data + i;
+        e->is_alloc = false;
+        e->type = NUMBER;
+        e->data.number = i;
+        array.data[i] = e;
     }
-    free_elem(e);
-    elem *e2 = new_elem(ARRAY);
+
+    elem *e2 = (elem *) alloc;
+    e2->is_alloc = true;
+    e2->type = ARRAY;
     e2->data.array = array;
     push(s, e2);
 }
 
 // get indecies where array values are not equal to zero
 void where(stack *s) {
-    elem *e = pop(s);
-    if (e->type != ARRAY) {
+    elem *e = pop_f(s);
+    if (!is_array(e)) {
         rerror("The argument to where needs to be an array!");
     }
-    arr array = e->data.array;
-    arr indecies;
-    indecies.len = 0;
-    indecies.data = malloc(0);
-    if (indecies.data == NULL) {
+    arr array = e_as_arr(e);
+    __builtin_prefetch(array.data);
+
+    size_t off = sizeof(elem *) * array.len + sizeof(elem);
+    void *alloc = malloc(off + sizeof(elem) * array.len);
+    if (alloc == NULL) {
         rerror("Out of memory!");
     }
-    for (size_t i = 0; i < array.len; i++) {
-        if (array.data[i]->type != NUMBER) {
-            rerror("The array needs to be a array of numbers!");
+    elem **data = (elem **) (alloc + sizeof(elem));
+    elem *elements = (elem *) (alloc + off);
+
+    size_t i = 0;
+    size_t j = 0;
+    for (; i < array.len; i ++) {
+        elem *x = array.data[i];
+        if (!is_bool(x)) {
+            rerror("The array to where needs to be an array of booleans!");
         }
-        if (array.data[i]->data.number != 0) {
-            indecies.len++;
-            indecies.data = realloc(indecies.data, indecies.len * sizeof(elem *));
-            if (indecies.data == NULL) {
-                rerror("Out of memory!");
-            }
-            elem *ine = new_elem(NUMBER);
-            ine->data.number = i;
-            indecies.data[indecies.len - 1] = ine;
+        if (e_as_bool(x)) {
+            elem *n = elements + j;
+            n->type = NUMBER;
+            n->data.number = i;
+            data[j] = n;
+            j++;
         }
     }
-    free(array.data);
-    e->data.array = indecies;
-    push(s, e);
+
+    elem *na = (elem *) alloc;
+    na->type = ARRAY;
+    na->data.array.len = j;
+    na->data.array.data = data;
+
+    push(s, na);
 }
 
 // remove all duplicate elements from an array
@@ -699,7 +745,7 @@ void deduplicate(stack *s) {
             new_array.data[new_array.len - 1] = array.data[i];
         }
     }
-    free(array.data);
+    freex(array.data);
     e->data.array = new_array;
     push(s, e);
 }
@@ -840,35 +886,59 @@ void keep(stack *s) {
 // example 2:
 //   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
 void find(stack *s) {
-    elem *find = pop(s);
+    elem *what = pop_f(s);
+    elem *where = pop_f(s);
 
-    elem *in = pop(s);
-    if (in->type != ARRAY) {
-        rerror("The second argument to find needs to be an array!");
+    if (!is_array(where)) {
+        rerror("Expected array, got %s!", type_to_str(where->type));
     }
+    arr a = e_as_arr(where);
+    __builtin_prefetch(a.data);
 
-    if (find->type == ARRAY) {
-        new_array(s);
-        for (size_t i = 0; i < in->data.array.len; i ++) {
-            bool any = false;
-            elem *e = in->data.array.data[i];
-            for (size_t j = 0; j < find->data.array.len; j ++) {
-                if (elems_equal(e, find->data.array.data[j])) {
-                    any = true;
+    size_t off = sizeof(elem *) * a.len;
+    void *alloc = malloc(off + sizeof(elem) * a.len);
+    if (alloc == NULL) {
+        rerror("Out of memory!");
+    }
+    elem **data = (elem **) alloc;
+    elem *elems = (elem *) (alloc + off);
+
+    if (is_array(what)) {
+        arr w = e_as_arr(what);
+        for (size_t i = 0; i < a.len; i ++) {
+            bool found = false;
+            for (size_t j = 0; i < w.len; i ++) {
+                if (elems_equal(a.data[i], w.data[j])) {
+                    found = true;
                     break;
                 }
             }
-            push_bool(s, any);
+            elems[i].is_alloc = false;
+            elems[i].type = NUMBER;
+            elems[i].data.number = (double) found;
+            data[i] = &elems[i];
         }
-        end_array(s);
-        return;
+    }
+    else {
+        for (size_t i = 0; i < a.len; i ++) {
+            elems[i].is_alloc = false;
+            elems[i].type = NUMBER;
+            elems[i].data.number = (double) elems_equal(a.data[i], what);
+            data[i] = &elems[i];
+        }
     }
 
-    new_array(s);
-    for (size_t i = 0; i < in->data.array.len; i ++) {
-        push_bool(s, elems_equal(find, in->data.array.data[i]));
-    }
-    end_array(s);
+    elem *res = new_elem(ARRAY);
+    res->data.array.len = a.len;
+    res->data.array.data = data;
+    res->is_alloc = true;
+
+    push(s, res);
+
+    free_elem(where);
+    free_elem(what);
+
+    unused(alloc);
 }
 
 // Combine two arrays OR scalars as rows of a new array
@@ -943,33 +1013,30 @@ void distribute(stack *s) {
 // Apply a reducing function to an array
 void reduce(stack *s) {
     elem *f = pop(s);
-    elem *b = pop(s);
-
-    if (f->type != FUNPTR) {
-        rerror("Expected function pointer, got %s!", type_to_str(f->type));
+    if (!is_funptr(f)) {
+        rerror("Expected function, got %s!", type_to_str(f->type));
     }
 
-    if (b->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(b->type));
+    elem *a = pop_f(s);
+    if (!is_array(a)) {
+        rerror("Expected array, got %s!", type_to_str(a->type));
     }
 
-    arr array_b = b->data.array;
+    arr array = e_as_arr(a);
 
-    if (array_b.len == 0) {
+    if (array.len == 0) {
         rerror("Cannot reduce empty array!");
     }
 
-    elem *e = eclone(array_b.data[0]);
-    for (size_t i = 1; i < array_b.len; i++) {
-        push(s, e);
-        push(s, array_b.data[i]);
-        f->data.ptr(s);
-        e = pop(s);
+    push(s, array.data[0]);
+    funptr fptr = f->data.ptr;
+    for (size_t i = 1; i < array.len; i++) {
+        push(s, array.data[i]);
+        fptr(s);
     }
 
-    free_elem(b);
+    unused(a);
     free_elem(f);
-    push(s, e);
 }
 
 // Apply a reducing function to an array with an initial value
@@ -1080,8 +1147,8 @@ void split_op(stack *s) {
 
     end_array(s);
 
-    free(arr.data);
-    free(array);
+    freex(arr.data);
+    freex(array);
 }
 
 // applies a function to each possible combination of two arrays
@@ -1110,18 +1177,18 @@ void table(stack *s) {
 
     for (size_t i = 0; i < array_a.len; i++) {
         for (size_t j = 0; j < array_b.len; j++) {
-            push(s, eclone(array_a.data[i]));
-            push(s, eclone(array_b.data[j]));
+            push(s, array_a.data[i]);
+            push(s, array_b.data[j]);
             f->data.ptr(s);
         }
     }
 
     end_array(s);
 
-    free(array_a.data);
-    free(array_b.data);
-    free(a);
-    free(b);
+    freex(array_a.data);
+    freex(array_b.data);
+    freex(a);
+    freex(b);
 }
 
 // combines two arrays by grouping each element of one array into a pair with the corresponding element of the other array
@@ -1165,10 +1232,10 @@ void group(stack *s) {
 
     end_array(s);
 
-    free(array_a.data);
-    free(array_b.data);
-    free(a);
-    free(b);
+    freex(array_a.data);
+    freex(array_b.data);
+    freex(a);
+    freex(b);
 }
 
 // pushes all elements of an array onto the stack
@@ -1186,8 +1253,8 @@ void dearray(stack *s) {
         push(s, array.data[i]);
     }
 
-    free(array.data);
-    free(e);
+    freex(array.data);
+    freex(e);
 }
 
 // removes a fragment from an array
@@ -1233,8 +1300,8 @@ void fragment(stack *s) {
     }
     end_array(s);
 
-    free(arr.data);
-    free(array);
+    freex(arr.data);
+    freex(array);
 }
 
 // rotates the shape of an array

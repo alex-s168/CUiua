@@ -44,6 +44,7 @@ static elem *combine_simple_two_numbers(
                                                        f2op, d2op,
                                                        f1d1op, d1f1op);
         }
+        unused(a);
         return e_from_arr(array);
     }
     bool b_arr = is_array(b);
@@ -54,6 +55,7 @@ static elem *combine_simple_two_numbers(
                                                        f2op, d2op,
                                                        f1d1op, d1f1op);
         }
+        unused(b);
         return e_from_arr(array);
     }
     if (a_arr && b_arr) {
@@ -70,18 +72,11 @@ static elem *combine_simple_two_numbers(
         return e_from_arr(a_array);
     }
     rerror("Invalid types for operator!");
-}
-
-static fract add_f2(fract a, fract b) {
-    return add_fract(a, b);
+    return NULL;
 }
 
 static double add_d2(double a, double b) {
     return a + b;
-}
-
-static fract add_f1d1(fract a, double b) {
-    return add_fract_d(a, b);
 }
 
 static fract add_d1f1(double a, fract b) {
@@ -89,51 +84,39 @@ static fract add_d1f1(double a, fract b) {
 }
 
 void add(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
-    push(s, combine_simple_two_numbers(a, b,
-                                       add_f2, add_d2,
-                                       add_f1d1, add_d1f1));
-    free_elem(a);
-    free_elem(b);
-}
-
-static fract sub_f2(fract a, fract b) {
-    return sub_fract(a, b);
+    elem *b = pop_f(s);
+    elem *a = peek(s);
+    elem *e = combine_simple_two_numbers(a, b,
+                                         add_fract, add_d2,
+                                         add_fract_d, add_d1f1);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double sub_d2(double a, double b) {
     return a - b;
 }
 
-static fract sub_f1d1(fract a, double b) {
-    return sub_fract_d1(a, b);
-}
-
-static fract sub_d1f1(double a, fract b) {
-    return sub_fract_d0(a, b);
-}
-
 void sub(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
-    push(s, combine_simple_two_numbers(a, b,
-                                       sub_f2, sub_d2,
-                                       sub_f1d1, sub_d1f1));
-    free_elem(a);
-    free_elem(b);
-}
-
-static fract mul_f2(fract a, fract b) {
-    return mul_fract(a, b);
+    elem *b = pop_f(s);
+    elem *a = peek(s);
+    elem *e = combine_simple_two_numbers(a, b,
+                                         sub_fract, sub_d2,
+                                         sub_fract_d1, sub_fract_d0);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double mul_d2(double a, double b) {
     return a * b;
-}
-
-static fract mul_f1d1(fract a, double b) {
-    return mul_fract_d(a, b);
 }
 
 static fract mul_d1f1(double a, fract b) {
@@ -141,37 +124,33 @@ static fract mul_d1f1(double a, fract b) {
 }
 
 void mul(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
-    push(s, combine_simple_two_numbers(a, b,
-                                       mul_f2, mul_d2,
-                                       mul_f1d1, mul_d1f1));
-    free_elem(a);
-    free_elem(b);
-}
-
-static fract div_f2(fract a, fract b) {
-    return div_fract(a, b);
+    elem *b = pop_f(s);
+    elem *a = peek(s);
+    elem *e = combine_simple_two_numbers(a, b,
+                                         mul_fract, mul_d2,
+                                         mul_fract_d, mul_d1f1);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double div_d2(double a, double b) {
     return a / b;
 }
 
-static fract div_f1d1(fract a, double b) {
-    return div_fract_d1(a, b);
-}
-
-static fract div_d1f1(double a, fract b) {
-    return div_fract_d0(a, b);
-}
-
 void div_op(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
-    push(s, combine_simple_two_numbers(a, b,
-                                       div_f2, div_d2,
-                                       div_f1d1, div_d1f1));
-    free_elem(a);
-    free_elem(b);
+    elem *b = pop_f(s);
+    elem *a = peek(s);
+    elem *e = combine_simple_two_numbers(a, b,
+                                         div_fract, div_d2,
+                                         div_fract_d1, div_fract_d0);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }

@@ -97,7 +97,12 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
 
             // find function name
             size_t j = i + 1;
-            while (j < len && code[j] != ' ' && code[j] != '\n' && code[j] != '(') {
+            while (j < len
+                && code[j] != ' '
+                && code[j] != '\n'
+                && code[j] != '\r'
+                && code[j] != '(')
+            {
                 j++;
             }
             if (j == len) {
@@ -334,7 +339,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  distribute(s);\n");
             continue;
         }
-        UC(curr, "∧") {
+        UC(curr, "fold") { // TODO: find symbol
             fprintf(main, "  fold(s);\n");
             continue;
         }
@@ -426,7 +431,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  read_file(s);\n");
             continue;
         }
-        UC(curr, "nl") { // TODO: find character for this
+        UC(curr, "↪") {
             fprintf(main, "  push_char(s, '\\n');\n");
             continue;
         }
@@ -450,13 +455,25 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  makefract(s);\n");
             continue;
         }
-        UC(curr, "acc") { // TODO: find symbol
+        UC(curr, "℀") {
             fprintf(main, "  accuracy(s);\n");
+            continue;
+        }
+        UC(curr, "∨") {
+            fprintf(main, "  or_op(s);\n");
+            continue;
+        }
+        UC(curr, "∧") {
+            fprintf(main, "  and_op(s);\n");
+            continue;
+        }
+        UC(curr, "⊻") {
+            fprintf(main, "  xor_op(s);\n");
             continue;
         }
         switch (code[i]) {
             case '#': {
-                while (i < len && code[i] != '\n') {
+                while (i < len && code[i] != '\n' && code[i] != '\r') {
                     i++;
                 }
                 break;
@@ -525,7 +542,7 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 break;
             }
             case ';': {
-                fprintf(main, "  pop(s);\n");
+                fprintf(main, "  drop_one(s);\n");
                 break;
             }
             case '.': {
@@ -551,7 +568,8 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
                 fprintf(main, "  scan(s);\n");
                 break;
             case ' ':
-            case '\n' :
+            case '\r':
+            case '\n':
                 break;
             default: {
                 if (isdigit(code[i])) {

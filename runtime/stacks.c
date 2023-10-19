@@ -3,6 +3,7 @@
 //
 
 #include "main.h"
+#include "config.h"
 
 #ifdef NOSTD
 #include "std.h"
@@ -21,36 +22,75 @@ void sinit(stack *s) {
 
 void sfree(stack *s) {
     for (size_t i = 0; i < s->nextpos; i++) {
+#ifdef STACK_CLEANUP
+        unused(s->data[i]);
+#else
         free_elem(s->data[i]);
+#endif
     }
     free(s->data);
+}
+
+void drop_one(stack *s) {
+    free_elem(pop_f(s));
 }
 
 void push(stack *s, elem *e) {
     if (s->nextpos >= s->alloc) {
         s->alloc *= 2;
-        elem **new = realloc(s->data, sizeof(elem *) * s->alloc);
+        size_t all = s->alloc;
+        elem **new = realloc(s->data, sizeof(elem *) * all);
         if (new == NULL) {
             rerror("Out of memory!");
         }
         s->data = new;
+#ifdef STACK_DEBUG
+        stack_realloc(s, all);
+#endif
     }
     s->data[s->nextpos++] = e;
 }
 
-elem *pop(stack *s) {
+elem *pop_f(stack *s) {
     if (s->nextpos == 0) {
         rerror("Stack underflow!");
     }
     if (s->nextpos <= s->alloc / 2 && s->alloc > 10) {
         s->alloc /= 2;
-        elem **new = realloc(s->data, sizeof(elem *) * s->alloc);
+        size_t all = s->alloc;
+
+        elem **new = realloc(s->data, sizeof(elem *) * all);
         if (new == NULL) {
             rerror("Out of memory!");
         }
         s->data = new;
+#ifdef STACK_DEBUG
+        stack_realloc(s, all);
+#endif
     }
-    return s->data[--s->nextpos];
+    elem *e = s->data[--s->nextpos];
+    // add_for_cleanup(e);
+    return e;
+}
+
+elem *pop(stack *s) {
+    return eclone(pop_f(s));
+}
+
+// reserves space for n elements
+void sreserve(stack *s, size_t size) {
+    size_t newsize = s->alloc + size;
+    if (newsize > s->alloc) {
+        elem **new = realloc(s->data, sizeof(elem *) * newsize);
+        if (new == NULL) {
+            rerror("Out of memory!");
+        }
+        s->data = new;
+        s->alloc = newsize;
+#ifdef STACK_DEBUG
+        stack_realloc(s, newsize);
+#endif
+    }
 }
 
 void push_number(stack *s, double number) {
@@ -95,18 +135,20 @@ void dup(stack *s) {
 }
 
 void swap(stack *s) {
-    elem *a = pop(s);
-    elem *b = pop(s);
-    push(s, a);
-    push(s, b);
+    if (s->nextpos < 2) {
+        rerror("Stack underflow!");
+    }
+    elem *a = s->data[s->nextpos - 1];
+    elem *b = s->data[s->nextpos - 2];
+    s->data[s->nextpos - 1] = b;
+    s->data[s->nextpos - 2] = a;
 }
 
 void over(stack *s) {
-    elem *a = pop(s);
-    elem *b = pop(s);
-    push(s, b);
-    push(s, a);
-    push(s, eclone(b));
+    if (s->nextpos < 2) {
+        rerror("Stack underflow!");
+    }
+    push(s, eclone(s->data[s->nextpos - 2]));
 }
 
 bool has_next(stack *s) {

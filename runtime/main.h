@@ -51,6 +51,8 @@ struct elem {
 
     bool f_bool;
     bool f_char;
+
+    bool is_alloc;
 };
 
 struct stack{
@@ -58,6 +60,20 @@ struct stack{
     size_t nextpos;
     size_t alloc;
 };
+
+// marks an element as unused
+void unused(elem *e);
+
+// adds an element to the cleanup list
+// do not call with an element pointer unless you know what you are doing.
+void add_for_cleanup(void *e);
+
+// cleans all the elements in the cleanup list
+void cleanup();
+
+// frees a pointer
+// if it is in the cleanup list it will be removed
+void freex(void *e);
 
 // initializes the runtime
 void initrt();
@@ -71,14 +87,14 @@ elem *new_elem(elem_type type);
 // frees a element
 void free_elem(elem *e);
 
+// copies a element into another one
+void copy_elem(elem *dest, elem *src);
+
 // starts a array literal
 void new_array(stack *s);
 
 // ends a array literal
 void end_array(stack *s);
-
-// ends a array literal (reverses array)
-void end_array_rev(stack *s);
 
 // pushes a array onto the stack
 void push_array(stack *s, arr array);
@@ -100,8 +116,19 @@ void push(stack *s, elem *e);
 
 bool has_next(stack *s);
 
+// drops one element from an array
+void drop_one(stack *s);
+
 // pops a element from the stack
 elem *pop(stack *s);
+
+elem *pop_f(stack *s);
+
+// reserves space for n elements
+void sreserve(stack *s, size_t size);
+
+// debug function
+void stack_realloc(stack *s, size_t size);
 
 // peeks at the top element on the stack
 elem *peek(stack *s);
@@ -133,9 +160,14 @@ char *etostra(elem *e, bool negative_sign_right);
 // prints the whole stack
 void sdump(stack *s);
 
+// checks if two elements are equal
 bool elems_equal(elem *a, elem *b);
 
+// deep-clones an element
 elem *eclone(elem *e);
+
+// deep-clones an element into a memory location
+void eclone_into(elem *dest, elem *src);
 
 iarr arr_to_iarr(arr a);
 

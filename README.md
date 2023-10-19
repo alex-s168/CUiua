@@ -22,7 +22,7 @@ or
 ### Function that removes a fragment from an array
 (you could also just use the "fragment" operator)
 ```
-⟼Fragment (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡Xor!¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
+⟼Fragment (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡⊻¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
 ```
 
 ## Usage
@@ -45,7 +45,8 @@ make
 cat program.cua | ./cuiua > program.c
 
 # Compile the CUiua program with the runtime library
-gcc program.c runtime.a -o program
+gcc program.c runtime.a -lm -o program
+# (or use any other C compiler like tcc or clang)
 
 # Run the program
 ./program
