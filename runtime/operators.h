@@ -294,4 +294,13 @@ void makefract(stack *s);
 // [number] [other] accuracy  ->  [accuracy]
 void accuracy(stack *s);
 
+// or operator
+void or_op(stack *s);
+
+// xor operator
+void xor_op(stack *s);
+
+// and operator
+void and_op(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

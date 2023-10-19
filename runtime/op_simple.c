@@ -223,8 +223,8 @@ void neq(stack *s) {
 
 // checks if top two elements on the stack are less than
 void lt(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
     if (is_fraction(a) && is_fraction(b)) {
         push_bool(s, fract_less(e_as_fraction(a), e_as_fraction(b)));
         return;
@@ -238,8 +238,8 @@ void lt(stack *s) {
 
 // checks if top two elements on the stack are less than or equal to
 void lte(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
     if (is_fraction(a) && is_fraction(b)) {
         push_bool(s, fract_less_equals(e_as_fraction(a), e_as_fraction(b)));
         return;
@@ -253,8 +253,8 @@ void lte(stack *s) {
 
 // checks if top two elements on the stack are greater than
 void gt(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
     if (is_fraction(a) && is_fraction(b)) {
         push_bool(s, fract_less(e_as_fraction(b), e_as_fraction(a)));
         return;
@@ -268,8 +268,8 @@ void gt(stack *s) {
 
 // checks if top two elements on the stack are greater than or equal to
 void gte(stack *s) {
-    elem *b = pop(s);
-    elem *a = pop(s);
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
     if (is_fraction(a) && is_fraction(b)) {
         push_bool(s, fract_less_equals(e_as_fraction(b), e_as_fraction(a)));
         return;
@@ -508,4 +508,37 @@ void accuracy(stack *s) {
     }
 
     rerror("Cannot calculate accuracy of %s to %s!", type_to_str(num->type), type_to_str(other->type));
+}
+
+// or operator
+void or_op(stack *s) {
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
+    if (is_bool(a) && is_bool(b)) {
+        push_bool(s, (e_as_bool(a) || e_as_bool(b)));
+        return;
+    }
+    rerror("Or operator can only be used on booleans!");
+}
+
+// xor operator
+void xor_op(stack *s) {
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
+    if (is_bool(a) && is_bool(b)) {
+        push_bool(s, (e_as_bool(a) != e_as_bool(b)));
+        return;
+    }
+    rerror("Xor operator can only be used on booleans!");
+}
+
+// and operator
+void and_op(stack *s) {
+    elem *b = pop_f(s);
+    elem *a = pop_f(s);
+    if (is_bool(a) && is_bool(b)) {
+        push_bool(s, (e_as_bool(a) && e_as_bool(b)));
+        return;
+    }
+    rerror("And operator can only be used on booleans!");
 }

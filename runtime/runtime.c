@@ -31,11 +31,6 @@ size_t cleanup_list_alloc = 8;
 stack array_builder_stack;
 
 void add_for_cleanup(void *e) {
-    for (size_t i = 0; i < cleanup_list_len; i++) {
-        if (cleanup_list[i] == e) {
-            return;
-        }
-    }
     if (cleanup_list_len >= cleanup_list_alloc) {
         cleanup_list_alloc *= 2;
         cleanup_list = realloc(cleanup_list, cleanup_list_alloc * sizeof(void *));
@@ -52,6 +47,14 @@ void cleanup() {
         if (e == NULL) {
             continue;
         }
+
+        // check if somewhere else in the list is a pointer to the same memory
+        for (size_t j = i+1; j < cleanup_list_len; j++) {
+            if (cleanup_list[j] == e) {
+                cleanup_list[j] = NULL;
+            }
+        }
+
         free(e);
     }
     cleanup_list_len = 0;
@@ -72,7 +75,7 @@ void freex(void *e) {
 void initrt() {
     sinit(&array_builder_stack);
     srand(time(NULL));
-    cleanup_list = malloc(cleanup_list_alloc);
+    cleanup_list = malloc(cleanup_list_alloc * sizeof(void *));
 }
 
 void stoprt() {
