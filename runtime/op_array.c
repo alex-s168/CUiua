@@ -638,7 +638,7 @@ void range(stack *s) {
     size_t off_into_alloc = sizeof(elem *) * n + sizeof(elem);
     void *alloc = malloc(off_into_alloc + sizeof(elem) * n);
 
-    array.data = (elem **) (alloc + sizeof(elem ));
+    array.data = (elem **) (alloc + sizeof(elem));
 
     elem *data = (elem *) (alloc + off_into_alloc);
     if (data == NULL) {
@@ -647,12 +647,14 @@ void range(stack *s) {
 
     for (size_t i = 0; i < n; i++) {
         elem *e = data + i;
+        e->is_alloc = false;
         e->type = NUMBER;
         e->data.number = i;
         array.data[i] = e;
     }
 
     elem *e2 = (elem *) alloc;
+    e2->is_alloc = true;
     e2->type = ARRAY;
     e2->data.array = array;
     push(s, e2);
@@ -897,6 +899,7 @@ void find(stack *s) {
                     break;
                 }
             }
+            elems[i].is_alloc = false;
             elems[i].type = NUMBER;
             elems[i].data.number = (double) found;
             data[i] = &elems[i];
@@ -904,6 +907,7 @@ void find(stack *s) {
     }
     else {
         for (size_t i = 0; i < a.len; i ++) {
+            elems[i].is_alloc = false;
             elems[i].type = NUMBER;
             elems[i].data.number = (double) elems_equal(a.data[i], what);
             data[i] = &elems[i];
@@ -913,13 +917,14 @@ void find(stack *s) {
     elem *res = new_elem(ARRAY);
     res->data.array.len = a.len;
     res->data.array.data = data;
+    res->is_alloc = true;
 
     push(s, res);
 
     free_elem(where);
     free_elem(what);
 
-    add_for_cleanup(alloc);
+    unused(alloc);
 }
 
 // Combine two arrays OR scalars as rows of a new array
@@ -998,7 +1003,7 @@ void reduce(stack *s) {
         rerror("Expected function, got %s!", type_to_str(f->type));
     }
 
-    elem *a = pop(s);
+    elem *a = pop_f(s);
     if (!is_array(a)) {
         rerror("Expected array, got %s!", type_to_str(a->type));
     }
@@ -1009,18 +1014,15 @@ void reduce(stack *s) {
         rerror("Cannot reduce empty array!");
     }
 
-    elem *e = eclone(array.data[0]);
-    push(s, e);
+    push(s, array.data[0]);
     funptr fptr = f->data.ptr;
     for (size_t i = 1; i < array.len; i++) {
         push(s, array.data[i]);
         fptr(s);
     }
-    e = pop_f(s);
 
-    add_for_cleanup(a);
+    unused(a);
     free_elem(f);
-    push(s, e);
 }
 
 // Apply a reducing function to an array with an initial value

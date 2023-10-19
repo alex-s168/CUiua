@@ -42,30 +42,41 @@ void add_for_cleanup(void *e) {
     cleanup_list[cleanup_list_len++] = e;
 }
 
+// marks an element as unused
+void unused(elem *e) {
+    if (e == NULL) {
+        return;
+    }
+    if (!e->is_alloc) {
+        return;
+    }
+    add_for_cleanup(e);
+}
+
 void cleanup() {
     size_t j = 0;
     for (size_t i = 0; i < cleanup_list_len; i++) {
+        __builtin_prefetch(cleanup_list + i);
+
         void *e = cleanup_list[i];
         if (e == NULL) {
             continue;
         }
 
-#ifdef FAST_FREE
-        free(e);
-
-        for (size_t k = i+1; k < cleanup_list_len; k++) {
+        for (size_t k = i + 1; k < cleanup_list_len; k++) {
             if (cleanup_list[k] == e) {
-                cleanup_list[k] = NULL;
+                goto skip;
             }
         }
-#else
-        // use freex because a element might be in the cleanup list twice
-        freex(e);
-#endif
 
+        free(e);
         j ++;
+
+        skip:;
     }
     cleanup_list_len = 0;
+    cleanup_list_alloc = 8;
+    cleanup_list = realloc(cleanup_list, cleanup_list_alloc * sizeof(void *));
 #ifdef CLEANUP_DEBUG
     printf("Cleaned up %zu elements\n", j);
 #endif
@@ -77,6 +88,7 @@ void freex(void *e) {
     if (e == NULL) {
         return;
     }
+
 #ifdef FAST_FREE
     add_for_cleanup(e);
 #else

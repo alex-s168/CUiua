@@ -1,3 +1,4 @@
+set -e
 rm -rf runtime/build
 mkdir runtime/build
 for file in runtime/*.c

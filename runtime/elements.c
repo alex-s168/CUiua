@@ -20,6 +20,7 @@ elem *new_elem(elem_type type) {
     e->type = type;
     e->f_bool = false;
     e->f_char = false;
+    e->is_alloc = true;
     return e;
 }
 
@@ -31,6 +32,9 @@ void free_elem(elem *e) {
     }
     if (e->type == BOXED) {
         free_elem(e->data.boxed);
+    }
+    if (!e->is_alloc) {
+        return;
     }
     freex(e);
 }
@@ -122,10 +126,10 @@ void eclone_into(elem *dest, elem *src) {
 // deep-clones an element
 elem *eclone(elem *e) {
     elem *clone = malloc(sizeof(elem));
+    clone->is_alloc = true;
     eclone_into(clone, e);
 
-    // add the original element to the cleanup list because it might not be freed otherwise
-    add_for_cleanup(e);
+    unused(e);
 
     return clone;
 }

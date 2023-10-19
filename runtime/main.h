@@ -51,6 +51,8 @@ struct elem {
 
     bool f_bool;
     bool f_char;
+
+    bool is_alloc;
 };
 
 struct stack{
@@ -58,6 +60,9 @@ struct stack{
     size_t nextpos;
     size_t alloc;
 };
+
+// marks an element as unused
+void unused(elem *e);
 
 // adds an element to the cleanup list
 // do not call with an element pointer unless you know what you are doing.

@@ -14,6 +14,6 @@
 // #define FAST_FREE
 
 /* print cleanup debug information */
-// #define CLEANUP_DEBUG
+#define CLEANUP_DEBUG
 
 #endif //CUIUA_CONFIG_H

@@ -44,6 +44,7 @@ static elem *combine_simple_two_numbers(
                                                        f2op, d2op,
                                                        f1d1op, d1f1op);
         }
+        unused(a);
         return e_from_arr(array);
     }
     bool b_arr = is_array(b);
@@ -54,6 +55,7 @@ static elem *combine_simple_two_numbers(
                                                        f2op, d2op,
                                                        f1d1op, d1f1op);
         }
+        unused(b);
         return e_from_arr(array);
     }
     if (a_arr && b_arr) {
@@ -87,8 +89,12 @@ void add(stack *s) {
     elem *e = combine_simple_two_numbers(a, b,
                                          add_fract, add_d2,
                                          add_fract_d, add_d1f1);
-    copy_elem(a, e);
-    free_elem(b);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double sub_d2(double a, double b) {
@@ -101,8 +107,12 @@ void sub(stack *s) {
     elem *e = combine_simple_two_numbers(a, b,
                                          sub_fract, sub_d2,
                                          sub_fract_d1, sub_fract_d0);
-    copy_elem(a, e);
-    free_elem(b);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double mul_d2(double a, double b) {
@@ -119,8 +129,12 @@ void mul(stack *s) {
     elem *e = combine_simple_two_numbers(a, b,
                                          mul_fract, mul_d2,
                                          mul_fract_d, mul_d1f1);
-    copy_elem(a, e);
-    free_elem(b);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }
 
 static double div_d2(double a, double b) {
@@ -133,6 +147,10 @@ void div_op(stack *s) {
     elem *e = combine_simple_two_numbers(a, b,
                                          div_fract, div_d2,
                                          div_fract_d1, div_fract_d0);
-    copy_elem(a, e);
-    free_elem(b);
+    if (a->is_alloc) {
+        copy_elem(a, e);
+    }
+    else {
+        s->data[s->nextpos - 1] = e;
+    }
 }

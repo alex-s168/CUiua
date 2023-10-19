@@ -65,7 +65,7 @@ elem *pop_f(stack *s) {
 #endif
     }
     elem *e = s->data[--s->nextpos];
-    add_for_cleanup(e);
+    // add_for_cleanup(e);
     return e;
 }
 
