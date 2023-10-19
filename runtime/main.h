@@ -60,7 +60,7 @@ struct stack{
 };
 
 // adds an element to the cleanup list
-// do not call with an element pointer. first call alloc_address_e()
+// do not call with an element pointer unless you know what you are doing.
 void add_for_cleanup(void *e);
 
 // cleans all the elements in the cleanup list
@@ -69,10 +69,6 @@ void cleanup();
 // frees a pointer
 // if it is in the cleanup list it will be removed
 void freex(void *e);
-
-// returns the allocation address of an element
-// DO NOT USE THIS FUNCTION OUTSIDE THE RUNTIME
-void *alloc_address_e(elem *e);
 
 // initializes the runtime
 void initrt();
@@ -114,6 +110,9 @@ void push_bool(stack *s, bool b);
 void push(stack *s, elem *e);
 
 bool has_next(stack *s);
+
+// drops one element from an array
+void drop_one(stack *s);
 
 // pops a element from the stack
 elem *pop(stack *s);

@@ -3,6 +3,7 @@
 //
 
 #include "main.h"
+#include "config.h"
 
 #include <stdarg.h>
 
@@ -42,34 +43,50 @@ void add_for_cleanup(void *e) {
 }
 
 void cleanup() {
+    size_t j = 0;
     for (size_t i = 0; i < cleanup_list_len; i++) {
         void *e = cleanup_list[i];
         if (e == NULL) {
             continue;
         }
 
-        // check if somewhere else in the list is a pointer to the same memory
-        for (size_t j = i+1; j < cleanup_list_len; j++) {
-            if (cleanup_list[j] == e) {
-                cleanup_list[j] = NULL;
+#ifdef FAST_FREE
+        free(e);
+
+        for (size_t k = i+1; k < cleanup_list_len; k++) {
+            if (cleanup_list[k] == e) {
+                cleanup_list[k] = NULL;
             }
         }
+#else
+        // use freex because a element might be in the cleanup list twice
+        freex(e);
+#endif
 
-        free(e);
+        j ++;
     }
     cleanup_list_len = 0;
+#ifdef CLEANUP_DEBUG
+    printf("Cleaned up %zu elements\n", j);
+#endif
 }
 
 // frees a pointer
 // if it is in the cleanup list it will be removed
 void freex(void *e) {
+    if (e == NULL) {
+        return;
+    }
+#ifdef FAST_FREE
+    add_for_cleanup(e);
+#else
     for (size_t i = 0; i < cleanup_list_len; i++) {
         if (cleanup_list[i] == e) {
             cleanup_list[i] = NULL;
-            break;
         }
     }
     free(e);
+#endif
 }
 
 void initrt() {
@@ -98,7 +115,7 @@ void end_array(stack *s) {
     if (array_builder_stack.nextpos == 0) {
         rerror("Unmatched end_array()!");
     }
-    elem *e = pop(&array_builder_stack);
+    elem *e = pop_f(&array_builder_stack);
     size_t start = (size_t) e->data.number;
     size_t len = (size_t) (s->nextpos - start);
     arr array;
@@ -114,6 +131,7 @@ void end_array(stack *s) {
         for (size_t i = 0; i < len; i++) {
             array.data[len-1-i] = pop_f(s);
         }
+        add_for_cleanup(array.data);
     }
     e->type = ARRAY;
     e->data.array = array;

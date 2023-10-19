@@ -29,10 +29,6 @@ void free_elem(elem *e) {
     if (e == NULL) {
         return;
     }
-    if (e->type == ARRAY) {
-        freex(e->data.array.data);
-        return;
-    }
     if (e->type == BOXED) {
         free_elem(e->data.boxed);
     }
@@ -129,7 +125,7 @@ elem *eclone(elem *e) {
     eclone_into(clone, e);
 
     // add the original element to the cleanup list because it might not be freed otherwise
-    add_for_cleanup(alloc_address_e(e));
+    add_for_cleanup(e);
 
     return clone;
 }
@@ -137,16 +133,4 @@ elem *eclone(elem *e) {
 // copies a element into another one
 void copy_elem(elem *dest, elem *src) {
     memcpy(dest, src, sizeof(elem));
-}
-
-// returns the allocation address of an element
-// DO NOT USE THIS FUNCTION OUTSIDE THE RUNTIME
-void *alloc_address_e(elem *e) {
-    if (e == NULL) {
-        return NULL;
-    }
-    if (e->type == ARRAY) {
-        return e->data.array.data;
-    }
-    return e;
 }

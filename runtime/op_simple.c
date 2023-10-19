@@ -38,7 +38,7 @@ void unbox(stack *s) {
     elem *unboxed = e->data.boxed;
     e->type = unboxed->type;
     e->data = unboxed->data;
-    free(unboxed);
+    freex(unboxed);
 }
 
 // debug prints the top element on the stack without popping it
@@ -345,7 +345,7 @@ void bracket(stack *s) {
 
 // reads all text from a file into a single string
 void read_file(stack *s) {
-    elem *name = pop(s);
+    elem *name = pop_f(s);
     if (name->type != ARRAY) {
         rerror("Expected string (array), got %s!", type_to_str(name->type));
     }
@@ -364,6 +364,7 @@ void read_file(stack *s) {
     push_string(s, str);
     free(filename);
     free(str);
+    free_elem(name);
 }
 
 // writes a string to a file (overwrites / creates the file)

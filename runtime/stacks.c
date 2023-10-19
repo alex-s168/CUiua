@@ -3,6 +3,7 @@
 //
 
 #include "main.h"
+#include "config.h"
 
 #ifdef NOSTD
 #include "std.h"
@@ -24,6 +25,10 @@ void sfree(stack *s) {
         free_elem(s->data[i]);
     }
     free(s->data);
+}
+
+void drop_one(stack *s) {
+    free_elem(pop_f(s));
 }
 
 void push(stack *s, elem *e) {
@@ -60,7 +65,7 @@ elem *pop_f(stack *s) {
 #endif
     }
     elem *e = s->data[--s->nextpos];
-    // add_for_cleanup(e); // TODO: why segfault?
+    add_for_cleanup(e);
     return e;
 }
 

@@ -635,10 +635,10 @@ void range(stack *s) {
     arr array;
     array.len = n;
 
-    size_t off_into_alloc = sizeof(elem *) * n;
-    void *alloc = malloc(off_into_alloc + sizeof(elem) * (n+1));
+    size_t off_into_alloc = sizeof(elem *) * n + sizeof(elem);
+    void *alloc = malloc(off_into_alloc + sizeof(elem) * n);
 
-    array.data = (elem **) alloc;
+    array.data = (elem **) (alloc + sizeof(elem ));
 
     elem *data = (elem *) (alloc + off_into_alloc);
     if (data == NULL) {
@@ -652,7 +652,7 @@ void range(stack *s) {
         array.data[i] = e;
     }
 
-    elem *e2 = data + n;
+    elem *e2 = (elem *) alloc;
     e2->type = ARRAY;
     e2->data.array = array;
     push(s, e2);
@@ -667,12 +667,12 @@ void where(stack *s) {
     arr array = e_as_arr(e);
     __builtin_prefetch(array.data);
 
-    size_t off = sizeof(elem *) * array.len;
-    void *alloc = malloc(off + sizeof(elem) * (array.len+1));
+    size_t off = sizeof(elem *) * array.len + sizeof(elem);
+    void *alloc = malloc(off + sizeof(elem) * array.len);
     if (alloc == NULL) {
         rerror("Out of memory!");
     }
-    elem **data = (elem **) alloc;
+    elem **data = (elem **) (alloc + sizeof(elem));
     elem *elements = (elem *) (alloc + off);
 
     size_t i = 0;
@@ -691,7 +691,7 @@ void where(stack *s) {
         }
     }
 
-    elem *na = elements + j;
+    elem *na = (elem *) alloc;
     na->type = ARRAY;
     na->data.array.len = j;
     na->data.array.data = data;
@@ -880,7 +880,7 @@ void find(stack *s) {
     __builtin_prefetch(a.data);
 
     size_t off = sizeof(elem *) * a.len;
-    void *alloc = malloc(off + sizeof(elem) * (a.len + 1));
+    void *alloc = malloc(off + sizeof(elem) * a.len);
     if (alloc == NULL) {
         rerror("Out of memory!");
     }
@@ -910,11 +910,16 @@ void find(stack *s) {
         }
     }
 
-    elems[a.len].type = ARRAY;
-    elems[a.len].data.array.len = a.len;
-    elems[a.len].data.array.data = data;
+    elem *res = new_elem(ARRAY);
+    res->data.array.len = a.len;
+    res->data.array.data = data;
 
-    push(s, &elems[a.len]);
+    push(s, res);
+
+    free_elem(where);
+    free_elem(what);
+
+    add_for_cleanup(alloc);
 }
 
 // Combine two arrays OR scalars as rows of a new array
@@ -1013,7 +1018,7 @@ void reduce(stack *s) {
     }
     e = pop_f(s);
 
-    add_for_cleanup(alloc_address_e(a));
+    add_for_cleanup(a);
     free_elem(f);
     push(s, e);
 }
