@@ -124,6 +124,9 @@ elem *pop(stack *s);
 
 elem *pop_f(stack *s);
 
+void hintes_multiple_pop(stack *s);
+void hintds_multiple_pop(stack *s);
+
 // reserves space for n elements
 void sreserve(stack *s, size_t size);
 

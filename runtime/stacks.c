@@ -51,10 +51,9 @@ void push(stack *s, elem *e) {
     s->data[s->nextpos++] = e;
 }
 
-elem *pop_f(stack *s) {
-    if (s->nextpos == 0) {
-        rerror("Stack underflow!");
-    }
+bool h_multiple_pop = false;
+
+static void shorten_stack(stack *s) {
     if (s->nextpos <= s->alloc / 2 && s->alloc > 10) {
         s->alloc /= 2;
         size_t all = s->alloc;
@@ -67,6 +66,24 @@ elem *pop_f(stack *s) {
 #ifdef STACK_DEBUG
         stack_realloc(s, all);
 #endif
+    }
+}
+
+void hintes_multiple_pop(stack *s) {
+    h_multiple_pop = true;
+}
+
+void hintds_multiple_pop(stack *s) {
+    h_multiple_pop = false;
+    shorten_stack(s);
+}
+
+elem *pop_f(stack *s) {
+    if (s->nextpos == 0) {
+        rerror("Stack underflow!");
+    }
+    if (!h_multiple_pop) {
+        shorten_stack(s);
     }
     elem *e = s->data[--s->nextpos];
     // add_for_cleanup(e);

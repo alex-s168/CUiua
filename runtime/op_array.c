@@ -547,9 +547,11 @@ int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
         return 0;
     }
     if (shape.len == 1) {
+        size_t sd0 = shape.data[0];
+        sreserve(s, sd0);
         new_array(s);
         size_t i;
-        for (i = 0; i < shape.data[0]; i++) {
+        for (i = 0; i < sd0; i++) {
             elem *e;
             if (i >= orig->len + index) {
                 e = new_elem(NUMBER);
@@ -563,9 +565,11 @@ int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
         end_array(s);
         return i;
     }
+    size_t sd0 = shape.data[0];
+    sreserve(s, sd0);
     new_array(s);
     size_t used = 0;
-    for (size_t i = 0; i < shape.data[0]; i++) {
+    for (size_t i = 0; i < sd0; i++) {
         used += reshape_rec(s, (iarr) { .data = shape.data + 1, .len = shape.len - 1 }, orig, index + used);
     }
     end_array(s);

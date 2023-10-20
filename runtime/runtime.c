@@ -142,9 +142,11 @@ void end_array(stack *s) {
             rerror("Out of memory!");
         }
         array.len = len;
+        hintes_multiple_pop(s);
         for (size_t i = 0; i < len; i++) {
             array.data[len-1-i] = pop_f(s);
         }
+        hintds_multiple_pop(s);
         add_for_cleanup(array.data);
     }
     e->type = ARRAY;
