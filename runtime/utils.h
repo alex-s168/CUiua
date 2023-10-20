@@ -23,4 +23,7 @@ void iarr_append(iarr *a, int n);
 
 bool iarr_contains(iarr a, int n);
 
+// drop the first element
+void iarr_drop(iarr *a);
+
 #endif //CUIUA_UTILS_H

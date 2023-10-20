@@ -56,3 +56,11 @@ bool iarr_contains(iarr a, int n) {
     }
     return false;
 }
+
+// drop the first element
+void iarr_drop(iarr *a) {
+    for (int i = 0; i < a->len - 1; i++) {
+        a->data[i] = a->data[i + 1];
+    }
+    a->len--;
+}

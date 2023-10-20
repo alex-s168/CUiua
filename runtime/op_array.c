@@ -171,7 +171,6 @@ static arr deshape_rec(arr a) {
 }
 
 // uses deshape_rec
-// TODO: investigate why    [[1 2] [1 2] [1 2]] . △ : ♭ : ↯    is broken
 void deshape(stack *s) {
     elem *a = pop(s);
     if (a->type != ARRAY) {
@@ -577,32 +576,25 @@ int reshape_rec(stack *s, iarr shape, arr *orig, size_t index) {
 // first arg: shape (array)
 // second arg: array
 void reshape(stack *s) {
-    elem *a = pop(s);
-    if (a->type != ARRAY) {
+    elem *a = pop_f(s);
+    if (!is_array(a)) {
         rerror("The first argument to reshape needs to be an array (shape)!");
     }
-    arr shape = a->data.array;
+    iarr shape = arr_to_iarr(a->data.array);
+    for (size_t i = 0; i < shape.len; i++) {
+        if (shape.data[i] <= 0) {
+            rerror("The shape needs to be positive!");
+        }
+    }
 
-    elem *b = pop(s);
-    if (b->type != ARRAY) {
+    elem *b = pop_f(s);
+    if (!is_array(b)) {
         rerror("The second argument to reshape needs to be an array!");
     }
     arr array = deshape_rec(b->data.array);
 
-    iarr shape_int;
-    shape_int.len = shape.len;
-    shape_int.data = malloc(shape_int.len * sizeof(int));
-    if (shape_int.data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < shape.len; i++) {
-        if (shape.data[i]->type != NUMBER || round(shape.data[i]->data.number) != shape.data[i]->data.number || shape.data[i]->data.number < 0) {
-            rerror("The shape needs to be a array of positive integers!");
-        }
-        shape_int.data[i] = (int) shape.data[i]->data.number;
-    }
-    reshape_rec(s, shape_int, &array, 0);
-    iarr_free(shape_int);
+    reshape_rec(s, shape, &array, 0);
+    iarr_free(shape);
 }
 
 // puts the type of the top element on the stack
