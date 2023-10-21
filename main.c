@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <wchar.h>
 
 /*
  # comment
@@ -481,6 +482,26 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
         }
         UC(curr, "⍟") { // name: count
             fprintf(main, "  count_until_false(s);\n");
+            continue;
+        }
+        UC(curr, "λ") { // anonymous function of one operator
+            wchar_t firstGlyph[6];
+            size_t l = mbstowcs(firstGlyph, code + i + 1, 1);
+
+            FILE *f = tmpfile();
+
+            int anon = rand();
+            compile(code + i + 1, l, f, top);
+            fprintf(top, "void f_%i(stack *s) {\n", anon);
+            rewind(f);
+            int c;
+            while ((c = getc(f)) != EOF) {
+                putc(c, top);
+            }
+            fclose(f);
+            fprintf(top, "}\n");
+            fprintf(main, "  push_addr(s, f_%i);\n", anon);
+            i += l;
             continue;
         }
         switch (code[i]) {
