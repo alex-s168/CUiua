@@ -89,8 +89,9 @@ int is_declared(char *name) {
     return -1;
 }
 
-void compile(char *code, size_t len, FILE *main, FILE *top) {
-    for (size_t i = 0; i < len; i++) {
+size_t compile(char *code, size_t len, FILE *main, FILE *top) {
+    size_t i = 0;
+    for (; i < len; i++) {
         char *curr = code + i;
         UC(curr, "⟼") { // named function declaration
             // example:   ⟼TestFunc (1 2 +)
@@ -485,13 +486,10 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             continue;
         }
         UC(curr, "λ") { // anonymous function of one operator
-            wchar_t firstGlyph[6];
-            size_t l = mbstowcs(firstGlyph, code + i + 1, 1);
-
             FILE *f = tmpfile();
 
             int anon = rand();
-            compile(code + i + 1, l, f, top);
+            size_t l = compile(code + i + 1, 1, f, top);
             fprintf(top, "void f_%i(stack *s) {\n", anon);
             rewind(f);
             int c;
@@ -625,6 +623,8 @@ void compile(char *code, size_t len, FILE *main, FILE *top) {
             }
         }
     }
+
+    return i;
 }
 
 #undef UC
