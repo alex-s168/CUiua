@@ -303,4 +303,10 @@ void xor_op(stack *s);
 // and operator
 void and_op(stack *s);
 
+// equals to      each (and) reduce
+void boolean_and_reduce(stack *s);
+
+// counts the amount of elements in an array before the first false value
+void count_until_false(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

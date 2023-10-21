@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #endif
 
+void shutd();
+
 void sinit(stack *s) {
     s->alloc = 10;
     s->data = malloc(sizeof(elem *) * 10);
@@ -18,6 +20,7 @@ void sinit(stack *s) {
         rerror("Out of memory!");
     }
     s->nextpos = 0;
+    add_shutdown_hook(shutd);
 }
 
 void sfree(stack *s) {
@@ -53,6 +56,12 @@ void push(stack *s, elem *e) {
 
 bool h_multiple_pop = false;
 
+void shutd() {
+    if (h_multiple_pop) {
+        rerror("The multiple pop flag was not reset!");
+    }
+}
+
 static void shorten_stack(stack *s) {
     if (s->nextpos <= s->alloc / 2 && s->alloc > 10) {
         s->alloc /= 2;
@@ -86,12 +95,13 @@ elem *pop_f(stack *s) {
         shorten_stack(s);
     }
     elem *e = s->data[--s->nextpos];
-    // add_for_cleanup(e);
+    unused(e);
     return e;
 }
 
 elem *pop(stack *s) {
-    return eclone(pop_f(s));
+    // return eclone(pop_f(s));
+    return pop_f(s);
 }
 
 // reserves space for n elements
@@ -149,6 +159,16 @@ elem *peek(stack *s) {
 
 void dup(stack *s) {
     push(s, eclone(peek(s)));
+}
+
+void dup2(stack *s) {
+    if (s->nextpos < 2) {
+        rerror("Stack underflow!");
+    }
+    elem *top = peek(s);
+    elem *second = s->data[s->nextpos - 2];
+    s->data[s->nextpos - 1] = eclone(second);
+    s->data[s->nextpos++] = eclone(top);
 }
 
 void swap(stack *s) {

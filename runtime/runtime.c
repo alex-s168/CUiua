@@ -101,13 +101,54 @@ void freex(void *e) {
 #endif
 }
 
+vfun *shutdown_funs = NULL;
+size_t shutdown_funs_count = 0;
+size_t shutdown_funs_alloc = 8;
+
 void initrt() {
     sinit(&array_builder_stack);
+
     srand(time(NULL));
+
     cleanup_list = malloc(cleanup_list_alloc * sizeof(void *));
+    if (cleanup_list == NULL) {
+        rerror("Out of memory!");
+    }
+
+    shutdown_funs = malloc(shutdown_funs_alloc * sizeof(vfun));
+    if (shutdown_funs == NULL) {
+        rerror("Out of memory!");
+    }
+}
+
+// adds a function to be executed when the runtime stops
+void add_shutdown_hook(vfun f) {
+    if (shutdown_funs == NULL) {
+        // no error here because the first sinit will call this function
+        return;
+    }
+
+    for (size_t i = 0; i < shutdown_funs_count; i++) {
+        if (shutdown_funs[i] == f) {
+            return;
+        }
+    }
+
+    if (shutdown_funs_count >= shutdown_funs_alloc) {
+        shutdown_funs_alloc *= 2;
+        shutdown_funs = realloc(shutdown_funs, shutdown_funs_alloc * sizeof(vfun));
+        if (shutdown_funs == NULL) {
+            rerror("Out of memory!");
+        }
+    }
+
+    shutdown_funs[shutdown_funs_count++] = f;
 }
 
 void stoprt() {
+    for (size_t i = 0; i < shutdown_funs_count; i++) {
+        shutdown_funs[i]();
+    }
     if (array_builder_stack.nextpos != 0) {
         rerror("Unmatched new_array()!");
     }
@@ -116,6 +157,7 @@ void stoprt() {
     cleanup();
 #endif
     free(cleanup_list);
+    free(shutdown_funs);
 }
 
 void new_array(stack *s) {

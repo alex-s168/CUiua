@@ -81,6 +81,11 @@ void initrt();
 // stops the runtime
 void stoprt();
 
+typedef void (*vfun)();
+
+// adds a function to be executed when the runtime stops
+void add_shutdown_hook(vfun f);
+
 // allocates a new element
 elem *new_elem(elem_type type);
 
@@ -141,6 +146,9 @@ void push_addr(stack *s, funptr ptr);
 
 // duplicates the top element on the stack
 void dup(stack *s);
+
+// duplicates the second-to-top element on the stack
+void dup2(stack *s);
 
 // swaps the top two elements on the stack
 void swap(stack *s);

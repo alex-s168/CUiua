@@ -1301,11 +1301,68 @@ void fragment(stack *s) {
 }
 
 // rotates the shape of an array
+// when each element of a transposed array gets reversed, the matrix (array) should be rotated 90 degrees
+// this function is allowed to modify the array's data in place
 void transpose(stack *s) {
     elem *arre = peek(s);
-    if (arre->type != ARRAY) {
+    if (!is_array(arre)) {
         rerror("Transpose can only be applied on multi-dimensional arrays!");
     }
+    arr array = e_as_arr(arre);
 
-    rerror("Transpose not implemented yet!");
+    rerror("Not implemented yet!");
+}
+
+// equals to      each (and) reduce
+void boolean_and_reduce(stack *s) {
+    elem *fe = pop_f(s);
+    if (!is_funptr(fe)) {
+        rerror("First argument to all operator needs to be a function!");
+    }
+    funptr f = e_as_funptr(fe);
+
+    elem *ae = pop_f(s);
+    if (!is_array(ae)) {
+        rerror("Second argument to all operator needs to be an array!");
+    }
+    arr a = e_as_arr(ae);
+
+    hintes_multiple_pop(s);
+
+    bool acc = true;
+    for (size_t i = 0; i < a.len; i ++) {
+        elem *e = a.data[i];
+        push(s, e);
+        f(s);
+        acc = e_as_bool(pop(s));
+        if (!acc) {
+            break;
+        }
+    }
+    push_bool(s, acc);
+
+    hintds_multiple_pop(s);
+
+    free_elem(fe);
+}
+
+// counts the amount of elements in an array before the first false value
+void count_until_false(stack *s) {
+    elem *ae = pop_f(s);
+    if (!is_array(ae)) {
+        rerror("Expected array, got %s!", type_to_str(ae->type));
+    }
+    arr a = e_as_arr(ae);
+
+    size_t i = 0;
+    for (; i < a.len; i++) {
+        elem *e = a.data[i];
+        if (!e_as_bool(e)) {
+            break;
+        }
+    }
+
+    push_number(s, i);
+
+    free_elem(ae);
 }
