@@ -316,4 +316,7 @@ void if_op(stack *s);
 // call two functions on one value
 void fork_op(stack *s);
 
+// modulos operator
+void mod_op(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H

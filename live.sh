@@ -1,1 +1,1 @@
-make && watch -n0.2 "cat $1 | ./cuiua > out.c && gcc out.c runtime.a -o out -lm && ./out"
+make && ./compilert.sh && watch -n0.2 "cat $1 | ./cuiua > out.c && gcc out.c runtime.a -o out -lm && ./out"

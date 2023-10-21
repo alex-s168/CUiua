@@ -484,6 +484,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  count_until_false(s);\n");
             continue;
         }
+        UC(curr, "◿") {
+            fprintf(main, "  mod_op(s);\n");
+            continue;
+        }
         UC(curr, "λ") { // anonymous function of one operator
             FILE *f = tmpfile();
 
@@ -667,6 +671,7 @@ int main() {
     FILE *bottomf = tmpfile();
 
     printf("#include \"runtime/main.h\"\n#include \"runtime/operators.h\"\n\n");
+    printf("void f_spec_noop(stack *s) {\n  return;\n}\n\n");
     compile(code, pos, bottomf, topf);
 
     rewind(topf);
@@ -676,7 +681,6 @@ int main() {
         putchar(c);
     }
 
-    printf("void f_spec_noop(stack *s) {\n  return;\n}\n\n");
     printf("int main() {\n  stack st;\n  stack *s = &st;\n  initrt();\n  sinit(s);\n\n");
     while ((c = getc(bottomf)) != EOF) {
         putchar(c);

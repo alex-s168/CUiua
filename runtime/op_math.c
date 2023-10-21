@@ -154,3 +154,30 @@ void div_op(stack *s) {
         s->data[s->nextpos - 1] = e;
     }
 }
+
+// modulos operator
+void mod_op(stack *s) {
+    elem *by = pop_f(s);
+    if (!is_numeric(by)) {
+        rerror("Invalid type for modulo operator!");
+    }
+    int b = (int) e_as_num(by);
+
+    elem *e = pop_f(s);
+    if (is_numeric(e)) {
+        int a = (int) e_as_num(e);
+        push_number(s, a % b);
+        return;
+    }
+    if (is_array(e)) {
+        arr array = e_as_arr(e);
+        new_array(s);
+        for (size_t i = 0; i < array.len; i++) {
+            push_number(s, (int) e_as_num(array.data[i]) % b);
+        }
+        end_array(s);
+        return;
+    }
+
+    rerror("Invalid type for modulo operator!");
+}

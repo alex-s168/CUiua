@@ -394,6 +394,7 @@ void member(stack *s) {
         free_elem(b);
         elem *e = new_elem(NUMBER);
         e->data.number = index == -1 ? 0 : 1;
+        e->f_bool = true;
         push(s, e);
     } else if (b->type == ARRAY) {
         arr indecies;
@@ -409,6 +410,7 @@ void member(stack *s) {
             int index = index_of_elem_in_arr(b->data.array.data[i], array);
             elem *e = new_elem(NUMBER);
             e->data.number = index == -1 ? 0 : 1;
+            e->f_bool = true;
             indecies.data[i] = e;
         }
         free_elem(a);
@@ -912,6 +914,7 @@ void find(stack *s) {
             elems[i].is_alloc = false;
             elems[i].type = NUMBER;
             elems[i].data.number = (double) found;
+            elems[i].f_bool = true;
             data[i] = &elems[i];
         }
     }
@@ -919,6 +922,7 @@ void find(stack *s) {
         for (size_t i = 0; i < a.len; i ++) {
             elems[i].is_alloc = false;
             elems[i].type = NUMBER;
+            elems[i].f_bool = true;
             elems[i].data.number = (double) elems_equal(a.data[i], what);
             data[i] = &elems[i];
         }
@@ -1113,12 +1117,12 @@ void scan(stack *s) {
 // split can be used to remove elements from an array at specific positions like this:
 //   [1 2 3 4 5 6 7 8 9] [3 6] split deshape  ->  [1 2 3 5 6 8 9]
 void split_op(stack *s) {
-    elem *split = pop(s);
+    elem *split = pop_f(s);
     if (split->type != ARRAY) {
         rerror("Expected array, got %s!", type_to_str(split->type));
     }
 
-    elem *array = pop(s);
+    elem *array = pop_f(s);
     if (array->type != ARRAY) {
         rerror("Expected array, got %s!", type_to_str(array->type));
     }

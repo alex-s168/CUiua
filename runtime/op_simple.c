@@ -438,13 +438,13 @@ void cast_real(stack *s) {
         push_number(s, e_as_num(e));
         return;
     }
-    if (is_fraction(e)) {
-        push_number(s, fract_value(e_as_fraction(e)));
-        return;
-    }
     if (is_string(e)) {
         char *x;
         push_number(s, strtod(e_as_str(e), &x));
+        return;
+    }
+    if (is_fraction(e)) {
+        push_number(s, fract_value(e_as_fraction(e)));
         return;
     }
     rerror("Cannot cast %s to real!", type_to_str(e->type));

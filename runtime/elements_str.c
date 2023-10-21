@@ -127,15 +127,14 @@ char *etostra(elem *e, bool negative_sign_right) {
             }
 
             double num = e->data.number;
+
             if (e->f_char) {
-                char *str = malloc(4);
-                if (str == NULL) {
-                    rerror("Out of memory!");
+                if (num == '\n') {
+                    return "↪";
                 }
-                str[0] = '\'';
+                char *str = malloc(2);
+                str[0] = '@';
                 str[1] = (char) num;
-                str[2] = '\'';
-                str[3] = '\0';
                 return str;
             }
 
