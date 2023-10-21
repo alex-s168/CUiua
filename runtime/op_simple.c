@@ -571,3 +571,26 @@ void if_op(stack *s) {
         ff(s);
     }
 }
+
+// call two functions on one value
+void fork_op(stack *s) {
+    elem *f1 = pop(s);
+    if (!is_funptr(f1)) {
+        rerror("Expected function, got %s!", type_to_str(f1->type));
+    }
+    funptr f1t = e_as_funptr(f1);
+
+    elem *f2 = pop(s);
+    if (!is_funptr(f2)) {
+        rerror("Expected function, got %s!", type_to_str(f2->type));
+    }
+    funptr f2t = e_as_funptr(f2);
+
+    elem *e = pop_f(s);
+
+    push(s, e);
+    f1t(s);
+
+    push(s, eclone(e));
+    f2t(s);
+}

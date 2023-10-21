@@ -501,6 +501,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             i += l;
             continue;
         }
+        UC(curr, "⊃") {
+            fprintf(main, "  fork_op(s);\n");
+            continue;
+        }
         switch (code[i]) {
             case '#': {
                 while (i < len && code[i] != '\n' && code[i] != '\r') {

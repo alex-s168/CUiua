@@ -313,4 +313,7 @@ void count_until_false(stack *s);
 // executes the first function if the boolean is true, otherwise executes the second function
 void if_op(stack *s);
 
+// call two functions on one value
+void fork_op(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
