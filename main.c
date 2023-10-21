@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
-#include <wchar.h>
 
 /*
  # comment
@@ -597,6 +596,9 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
                 break;
             case '\\':
                 fprintf(main, "  scan(s);\n");
+                break;
+            case '?':
+                fprintf(main, "  if_op(s);\n");
                 break;
             case ' ':
             case '\r':

@@ -543,3 +543,31 @@ void and_op(stack *s) {
     }
     rerror("And operator can only be used on booleans!");
 }
+
+// [bool] [fun] [fun] if
+// executes the first function if the boolean is true, otherwise executes the second function
+void if_op(stack *s) {
+    elem *fTrue = pop(s);
+    if (!is_funptr(fTrue)) {
+        rerror("Expected function, got %s!", type_to_str(fTrue->type));
+    }
+    funptr ft = e_as_funptr(fTrue);
+
+    elem *fFalse = pop(s);
+    if (!is_funptr(fFalse)) {
+        rerror("Expected function, got %s!", type_to_str(fFalse->type));
+    }
+    funptr ff = e_as_funptr(fFalse);
+
+    elem *b = pop(s);
+    if (!is_bool(b)) {
+        rerror("Expected boolean, got %s!", type_to_str(b->type));
+    }
+    bool cond = e_as_bool(b);
+
+    if (cond) {
+        ft(s);
+    } else {
+        ff(s);
+    }
+}

@@ -309,4 +309,8 @@ void boolean_and_reduce(stack *s);
 // counts the amount of elements in an array before the first false value
 void count_until_false(stack *s);
 
+// [bool] [fun] [fun] if
+// executes the first function if the boolean is true, otherwise executes the second function
+void if_op(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
