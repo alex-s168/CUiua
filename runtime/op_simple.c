@@ -343,6 +343,7 @@ void bracket(stack *s) {
     e_as_funptr(f2)(s);
 }
 
+// TODO: handle unicode somehow
 // reads all text from a file into a single string
 void read_file(stack *s) {
     elem *name = pop_f(s);
@@ -400,6 +401,10 @@ void write_file(stack *s) {
 void cast_integer(stack *s) {
     elem *e = pop(s);
     if (is_numeric(e)) {
+        if (e->f_char) {
+            push_number(s, (int) e_as_num(e) - '0');
+            return;
+        }
         push_number(s, floor(e_as_num(e)));
         return;
     }
@@ -435,6 +440,10 @@ void cast_string(stack *s) {
 void cast_real(stack *s) {
     elem *e = pop(s);
     if (is_numeric(e)) {
+        if (e->f_char) {
+            push_number(s, (int) e_as_num(e) - '0');
+            return;
+        }
         push_number(s, e_as_num(e));
         return;
     }

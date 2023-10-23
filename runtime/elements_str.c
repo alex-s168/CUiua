@@ -201,7 +201,7 @@ char *etostra(elem *e, bool negative_sign_right) {
             return str;
         }
         default: {
-            return "unknown";
+            return type_to_str(e->type);
         }
     }
 }

@@ -166,7 +166,7 @@ static arr deshape_rec(arr a) {
             new_array.data[new_array.len - 1] = a.data[i];
         }
     }
-    freex(a.data);
+    //freex(a.data);
     return new_array;
 }
 
