@@ -45,7 +45,7 @@ size_t declared_alloc_s;
 void add_declared(char *name) {
     // checks if all characters are alphanumeric
     for (size_t i = 0; i < strlen(name); i++) {
-        if (!isalnum(name[i])) {
+        if (!(isalnum(name[i]) || name[i] == '_')) {
             ERR("Function names must be alphanumeric!");
         }
     }
@@ -73,7 +73,7 @@ int is_declared(char *name) {
                 match = false;
                 break;
             }
-            if (!isalnum(name[j])) {
+            if (!(isalnum(name[j]) || name[j] == '_')) {
                 break;
             }
             if (decl[j] != name[j]) {
