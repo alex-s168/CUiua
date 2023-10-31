@@ -24,7 +24,7 @@ or
 ### Function that removes a fragment from an array
 (you could also just use the "fragment" operator)
 ```
-⟼Fragment (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡⊻¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
+⟼FRAGMENT (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡⊻¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
 ```
 
 ## Usage
