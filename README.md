@@ -4,6 +4,8 @@ by Uiua.
 
 Recommended font: [DejaVu Sans Mono for CUiua](https://github.com/SuperCraftAlex/DejaVu-for-CUiua)
 
+The CUiua [formatter](https://github.com/SuperCraftAlex/CUiua-Formatter) is highly recommended
+
 ## Example code
 ### Find the lowest number in an array
 ```
