@@ -151,6 +151,12 @@ void keep(stack *s);
 //   [1 2 3 4 5 6 7 8 9 2 3 4] [2 3 4] find  ->  [0 1 0 0 0 0 0 0 0 1 0 0]
 void find(stack *s);
 
+// Similar to find but it searches for ANY element in an array.
+// If the element is a array, it searches for the array inside of the other array.
+// example:
+//   [[] [9] [5] [] [2]] [9] exact  ->  [0 1 0 0 0]
+void exact(stack *s);
+
 // Combine two arrays OR scalars as rows of a new array
 // example 1:
 //   [1 2 3] [4 5 6] couple  ->  [[1 2 3] [4 5 6]]

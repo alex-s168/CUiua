@@ -681,7 +681,7 @@ void where(stack *s) {
     arr array = e_as_arr(e);
     __builtin_prefetch(array.data);
 
-    size_t off = sizeof(elem *) * array.len + sizeof(elem);
+    size_t off = sizeof(elem *) * (array.len + 1);
     void *alloc = malloc(off + sizeof(elem) * array.len);
     if (alloc == NULL) {
         rerror("Out of memory!");
@@ -709,6 +709,7 @@ void where(stack *s) {
     na->type = ARRAY;
     na->data.array.len = j;
     na->data.array.data = data;
+    na->is_alloc = true;
 
     push(s, na);
 }
@@ -941,6 +942,40 @@ void find(stack *s) {
     unused(alloc);
 }
 
+// Similar to find but it searches for ANY element in an array.
+// If the element is a array, it searches for the array inside of the other array.
+void exact(stack *s) {
+    elem *what = pop_f(s);
+    elem *where = pop_f(s);
+    if (!is_array(where)) {
+        rerror("Expected array, got %s!", type_to_str(where->type));
+    }
+    arr a = e_as_arr(where);
+
+    size_t off = sizeof(elem *) * a.len;
+    void *alloc = malloc(off + sizeof(elem) * a.len);
+    if (alloc == NULL) {
+        rerror("Out of memory!");
+    }
+    elem **data = (elem **) alloc;
+    elem *elems = (elem *) (alloc + off);
+
+    for (size_t i = 0; i < a.len; i ++) {
+        elems[i].is_alloc = false;
+        elems[i].type = NUMBER;
+        elems[i].f_bool = true;
+        elems[i].data.number = (double) elems_equal(a.data[i], what);
+        data[i] = &elems[i];
+    }
+
+    elem *res = new_elem(ARRAY);
+    res->data.array.len = a.len;
+    res->data.array.data = data;
+    res->is_alloc = true;
+
+    push(s, res);
+}
+
 // Combine two arrays OR scalars as rows of a new array
 // example 1:
 //   [1 2 3] [4 5 6] couple  ->  [[1 2 3] [4 5 6]]
@@ -1148,7 +1183,7 @@ void split_op(stack *s) {
     end_array(s);
 
     freex(arr.data);
-    freex(array);
+    // freex(array);
 }
 
 // applies a function to each possible combination of two arrays

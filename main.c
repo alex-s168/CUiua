@@ -332,6 +332,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  find(s);\n");
             continue;
         }
+        UC(curr, "⌖") {
+            fprintf(main, "  exact(s);\n");
+            continue;
+        }
         UC(curr, "⊟") {
             fprintf(main, "  couple(s);\n");
             continue;

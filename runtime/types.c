@@ -26,7 +26,7 @@ bool is_numeric(elem *e) {
 bool is_array(elem *e) {
     return      e->type == ARRAY
                 || (e->type == FRACTION)
-                || (e->type == BOXED && is_array(e->data.boxed));
+                /* || (e->type == BOXED && is_array(e->data.boxed)); */;
 }
 
 // is the element a function pointer?
