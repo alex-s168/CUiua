@@ -408,6 +408,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  split_op(s);\n");
             continue;
         }
+        UC(curr, "⍞") {
+            fprintf(main, "  separate(s);\n");
+            continue;
+        }
         UC(curr, "⊞") {
             fprintf(main, "  table(s);\n");
             continue;

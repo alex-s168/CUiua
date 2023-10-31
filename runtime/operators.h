@@ -229,6 +229,9 @@ void min_op(stack *s);
 //   [1 2 3 4 5 6 7 8 9] [3 6] split deshape  ->  [1 2 3 5 6 8 9]
 void split_op(stack *s);
 
+// like split but discards empty arrays
+void separate(stack *s);
+
 // applies a function to each possible combination of two arrays
 // example:
 //   [1 2 3] [9 2 9 5] table  ->  [[10 3 10 6] [11 4 11 7] [12 5 12 8]]
