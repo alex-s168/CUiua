@@ -16,32 +16,27 @@
 
 // ↙
 void take(stack *s) {
-    elem *n = pop(s);
-    if (n->type != NUMBER || round(n->data.number) != n->data.number || n->data.number < 0) {
-        rerror("The first argument to take needs to be a positive integer!");
+    elem *ne = pop_f(s);
+    if (!is_numeric(ne)) {
+        rerror("First argument to take needs to be numeric!");
     }
-    size_t n_int = (size_t) n->data.number;
-    elem *a = pop(s);
-    if (a->type != ARRAY) {
-        rerror("The second argument to take needs to be an array!");
+    int n = (int) e_as_num(ne);
+
+    elem *ae = peek(s);
+    if (!is_array(ae)) {
+        rerror("Second argument to take needs to be an array!");
     }
-    arr array = a->data.array;
-    if (n->data.number > array.len) {
+    arr a = e_as_arr(ae);
+
+    // TODO: should maybe reallocate?
+
+    if (n > a.len) {
         rerror("Amount bigger than array length!");
     }
-    arr new_array;
-    new_array.len = n_int;
-    new_array.data = malloc(new_array.len * sizeof(elem *));
-    if (new_array.data == NULL) {
-        rerror("Out of memory!");
-    }
-    for (size_t i = 0; i < new_array.len; i++) {
-        new_array.data[i] = array.data[i];
-    }
-    freex(array.data);
-    a->data.array = new_array;
-    push(s, a);
-    free_elem(n);
+
+    a.len = n;
+
+    ae->data.array = a;
 }
 
 // ↘
@@ -716,14 +711,13 @@ void where(stack *s) {
 
 // remove all duplicate elements from an array
 void deduplicate(stack *s) {
-    elem *e = pop(s);
-    if (e->type != ARRAY) {
+    elem *e = peek(s);
+    if (!is_array(e)) {
         rerror("The argument to deduplicate needs to be an array!");
     }
-    arr array = e->data.array;
-    arr new_array;
-    new_array.len = 0;
-    new_array.data = malloc(0);
+    arr array = e_as_arr(e);
+    // TODO: should reallocate array?
+    arr new_array = (arr) { .len = 0, .data = malloc(array.len * sizeof(elem *)) };
     if (new_array.data == NULL) {
         rerror("Out of memory!");
     }
@@ -737,16 +731,16 @@ void deduplicate(stack *s) {
         }
         if (!found) {
             new_array.len++;
-            new_array.data = realloc(new_array.data, new_array.len * sizeof(elem *));
-            if (new_array.data == NULL) {
-                rerror("Out of memory!");
-            }
             new_array.data[new_array.len - 1] = array.data[i];
         }
     }
-    freex(array.data);
+    if (!e->is_alloc) {
+      // TODO: find out why this crashes
+      // freex(array.data);
+      e->is_alloc = false;
+    }
+    e->type = ARRAY;
     e->data.array = new_array;
-    push(s, e);
 }
 
 // enumerates an array
