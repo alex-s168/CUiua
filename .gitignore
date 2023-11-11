@@ -2,3 +2,8 @@
 /cmake-build-debug/
 test2.cua
 test/
+runtime/build
+cuiua
+out
+out.c
+runtime.a

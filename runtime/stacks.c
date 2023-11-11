@@ -150,6 +150,15 @@ void push_string(stack *s, char *str) {
     push_array(s, str_to_arr(str));
 }
 
+// TODO: optimize
+void push_strarr(stack *s, int len, char **arr) {
+    new_array(s);
+    for (int i = 0; i < len; i ++) {
+      push_string(s, arr[i]);
+    }
+    end_array(s);
+}
+
 elem *peek(stack *s) {
     if (s->nextpos == 0) {
         rerror("Stack underflow!");

@@ -110,6 +110,9 @@ void push_number(stack *s, double num);
 // pushes a string
 void push_string(stack *s, char *str);
 
+// pushes a string array
+void push_strarr(stack *s, int len, char **arr);
+
 // pushes a char
 void push_char(stack *s, char c);
 

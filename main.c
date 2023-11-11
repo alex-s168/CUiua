@@ -344,7 +344,7 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  distribute(s);\n");
             continue;
         }
-        UC(curr, "fold") { // TODO: find symbol
+        UC(curr, "fold") {
             fprintf(main, "  fold(s);\n");
             continue;
         }
@@ -515,6 +515,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
         }
         UC(curr, "⊃") {
             fprintf(main, "  fork_op(s);\n");
+            continue;
+        }
+        UC(curr, "§") {
+            fprintf(main, "  push_strarr(s, argc, argv);");
             continue;
         }
         switch (code[i]) {
@@ -689,7 +693,7 @@ int main() {
         putchar(c);
     }
 
-    printf("int main() {\n  stack st;\n  stack *s = &st;\n  initrt();\n  sinit(s);\n\n");
+    printf("int main(int argc, char **argv) {\n  stack st;\n  stack *s = &st;\n  initrt();\n  sinit(s);\n\n");
     while ((c = getc(bottomf)) != EOF) {
         putchar(c);
     }

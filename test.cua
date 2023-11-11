@@ -84,8 +84,8 @@
 ⟼SUDOKU_ROW_VALID (
     .♮⌕¬⊚⊏                      # remove all NaNs
      . .⊝⧻:⧻=:                  # check if all elements are unique
-       (.0> 9≤ And!)∵ (And!)/   # check if all elements are in range [0, 9]
-    And!
+       (.0> 9≤ AND!)∵ (AND!)/   # check if all elements are in range [0, 9]
+    AND!
 )
 
 # [4 7 ♮ ♮ 9 3 ♮ 6 5] SUDOKU_ROW_VALID!
@@ -103,13 +103,13 @@
 
 
 
-⟼Or (+1↧⊤=)
+⟼OR (+1↧⊤=)
 
-⟼Xor (⊂. (≡ Or!)(≡ And!¬)⊓ And!)
+⟼XOR (⊂. (≡ OR!)(≡ AND!¬)⊓ AND!)
 
-# ⊤ ⊤ Xor!
+# ⊤ ⊤ XOR!
 
-⟼FRAGMENT (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡Xor!¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
+⟼FRAGMENT (⊂.⊢⇡(;⊤)∵ : ⇌⊢1+⇡(;⊤)∵ ⊕ (≡XOR!¬)∵ [,⧻,⧻-(⊤):⍥] ⊂ ⊚ ⊏)
 
 # [3 9 2 1 6] 1 3 FRAGMENT!
 # [3 9 2 1 6] 1 3 ⬡
@@ -153,4 +153,6 @@
 # ⊤ λ1 λ4 ?
 
 ⟼IS_CAP (∅⊂ ((@A ≥) (@Z ≤) ⊃ ∧) ⁁)
-"AAa" IS_CAP!
+# "AAa" IS_CAP!
+
+§
