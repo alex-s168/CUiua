@@ -721,24 +721,42 @@ void deduplicate(stack *s) {
     if (new_array.data == NULL) {
         rerror("Out of memory!");
     }
-    for (size_t i = 0; i < array.len; i++) {
-        bool found = false;
-        for (size_t j = 0; j < new_array.len; j++) {
-            if (elems_equal(array.data[i], new_array.data[j])) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
+
+#define PRE \
+    for (size_t i = 0; i < array.len; i++) { \
+        bool found = false; \
+        for (size_t j = 0; j < new_array.len; j++) { \
+            if (elems_equal(array.data[i], new_array.data[j])) { \
+                found = true; \
+                break; \
+            } \
+        } \
+        if (!found) { \
             new_array.len++;
-            new_array.data[new_array.len - 1] = array.data[i];
-        }
+
+#define POST \
+        } \
     }
+
+    if (e->is_alloc) {
+      PRE
+      new_array.data[new_array.len - 1] = eclone(array.data[i]);
+      POST
+    }
+    else {
+      PRE
+      new_array.data[new_array.len - 1] = array.data[i];
+      POST
+    }
+
+#undef PRE
+#undef POST
+
     if (!e->is_alloc) {
-      // TODO: find out why this crashes
-      // freex(array.data);
+      freex(array.data);
       e->is_alloc = false;
     }
+
     e->type = ARRAY;
     e->data.array = new_array;
 }
