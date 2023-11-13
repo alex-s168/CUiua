@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #endif
 
 void call(stack *s) {
@@ -597,9 +598,9 @@ void fork_op(stack *s) {
 
     elem *e = pop_f(s);
 
-    push(s, e);
-    f1t(s);
-
     push(s, eclone(e));
     f2t(s);
+
+    push(s, e);
+    f1t(s);
 }

@@ -1156,6 +1156,43 @@ void scan(stack *s) {
     free_elem(f);
 }
 
+// TODO: make more efficient
+#define SPLIT_OP(ON_SPLIT, PRE) \
+    elem *split = pop_f(s);     \
+    if (!is_array(split)) {     \
+        rerror("Expected array, got %s!", type_to_str(split->type)); \
+    }                           \
+                                \
+    elem *array = pop_f(s);     \
+    if (!is_array(array)) {     \
+        rerror("Expected array, got %s!", type_to_str(array->type));\
+    }                           \
+                                \
+    arr arr = e_as_arr(array);  \
+                                \
+    iarr split_arr = arr_to_iarr(e_as_arr(split));                   \
+    free_elem(split);           \
+    PRE                         \
+                                \
+    new_array(s);               \
+                                \
+    new_array(s);               \
+    for (size_t i = 0; i < arr.len; i ++) {                          \
+        if (iarr_contains(split_arr, i)) {                           \
+            end_array(s);       \
+            new_array(s);       \
+            ON_SPLIT;           \
+        }                       \
+        push(s, arr.data[i]);   \
+    }                           \
+    end_array(s);               \
+                                \
+    end_array(s);               \
+                                \
+    freex(arr.data);            \
+                                \
+    iarr_free(split_arr);
+
 // first array is the array to be split
 // second array is the array of indiecies to split at
 // every split position will be removed from the array
@@ -1164,51 +1201,26 @@ void scan(stack *s) {
 // split can be used to remove elements from an array at specific positions like this:
 //   [1 2 3 4 5 6 7 8 9] [3 6] split deshape  ->  [1 2 3 5 6 8 9]
 void split_op(stack *s) {
-    elem *split = pop_f(s);
-    if (split->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(split->type));
-    }
-
-    elem *array = pop_f(s);
-    if (array->type != ARRAY) {
-        rerror("Expected array, got %s!", type_to_str(array->type));
-    }
-
-    arr arr = array->data.array;
-
-    iarr split_arr = arr_to_iarr(split->data.array);
-    free_elem(split);
-
-    new_array(s);
-
-    new_array(s);
-    for (size_t i = 0; i < arr.len; i ++) {
-        if (iarr_contains(split_arr, i)) {
-            end_array(s);
-            new_array(s);
-            continue;
-        }
-        push(s, arr.data[i]);
-    }
-    end_array(s);
-
-    end_array(s);
-
-    freex(arr.data);
-    // freex(array);
+    SPLIT_OP(continue;, ;)
 }
 
 // like split but discards empty arrays
-void separate(stack *s) { // TODO: make this more efficient
-    split_op(s);
-
-    dup(s);
-    new_array(s);
-    end_array(s);
-    exact(s);
-
-    not_op(s);
-    keep(s);
+void separate(stack *s) {
+    SPLIT_OP(continue;, do {
+        int prev;
+        if (split_arr.len < 2) {
+            break;
+        }
+        oIArr new_split_arr = oIArrFrom(split_arr);
+        for (size_t i = 1; i < split_arr.len; i++) {
+            if (split_arr.data[i] == prev + 1) {
+                oIArrRemove(&new_split_arr, i);
+            }
+            prev = split_arr.data[i];
+        }
+        split_arr = oIArrComplete(new_split_arr);
+        oIArrFree(new_split_arr);
+    } while (0);)
 }
 
 // applies a function to each possible combination of two arrays

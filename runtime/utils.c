@@ -9,6 +9,7 @@
 #include "std.h"
 #else
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 iarr iarr_join(iarr a, iarr b) {
@@ -63,4 +64,41 @@ void iarr_drop(iarr *a) {
         a->data[i] = a->data[i + 1];
     }
     a->len--;
+}
+
+iarr iarr_clone(iarr a) {
+    return (iarr) {
+        .len = a.len,
+        .data = memcpy(malloc(sizeof(int) * a.len), a.data, sizeof(int) * a.len)
+    };
+}
+
+
+oIArr oIArrFrom(iarr a) {
+    return (oIArr) {
+            .len = a.len,
+            .data_skip = calloc(sizeof(char), a.len),
+            .data = memcpy(malloc(sizeof(int) * a.len), a.data, sizeof(int) * a.len)
+    };
+}
+
+void oIArrFree(oIArr a) {
+    free(a.data_skip);
+    free(a.data);
+}
+
+iarr oIArrComplete(oIArr a) {
+    iarr arr;
+    iarr_init(&arr, 0);
+    for (size_t i = 0; i < a.len; i ++) {
+        if (a.data_skip[i]) {
+            continue;
+        }
+        iarr_append(&arr, a.data[i]);
+    }
+    return arr;
+}
+
+void oIArrRemove(oIArr *a, int n) {
+    a->data_skip[n] = 1;
 }

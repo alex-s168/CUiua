@@ -26,4 +26,20 @@ bool iarr_contains(iarr a, int n);
 // drop the first element
 void iarr_drop(iarr *a);
 
+iarr iarr_clone(iarr a);
+
+typedef struct {
+    bool *data_skip;
+    int *data;
+    size_t len;
+} oIArr;
+
+oIArr oIArrFrom(iarr a);
+
+void oIArrFree(oIArr a);
+
+iarr oIArrComplete(oIArr a);
+
+void oIArrRemove(oIArr *a, int n);
+
 #endif //CUIUA_UTILS_H
