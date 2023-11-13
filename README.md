@@ -2,6 +2,8 @@
 Stack based array programming language heavily inspired 
 by Uiua.
 
+You can find the documentation [here](https://supercraftalex.github.io/CUiua-doc/).
+
 Recommended font: [DejaVu Sans Mono for CUiua](https://github.com/SuperCraftAlex/DejaVu-for-CUiua)
 
 The CUiua [formatter](https://github.com/SuperCraftAlex/CUiua-Formatter) is highly recommended
