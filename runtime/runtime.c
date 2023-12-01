@@ -245,7 +245,8 @@ void end_array(stack *s) {
 
 void sdump(stack *s) {
     for (size_t i = 0; i < s->nextpos; i++) {
-        printf("%s\n", etostr(s->data[i]));
+        elem *e = s->data[i];
+        printf("%s\n", etostr(e));
     }
 }
 

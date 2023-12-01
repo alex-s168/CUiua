@@ -133,9 +133,7 @@ void push_addr(stack *s, funptr ptr) {
 }
 
 void push_array(stack *s, arr array) {
-    elem *e = new_elem(ARRAY);
-    e->data.array = array;
-    push(s, e);
+    push(s, e_from_arr(array));
 }
 
 // pushes a char

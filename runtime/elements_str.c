@@ -32,6 +32,7 @@ char *type_to_str(elem_type type) {
     }
 }
 
+__always_inline
 char *etostr(elem *e) {
     return etostra(e, true);
 }
@@ -104,7 +105,7 @@ char *etostra(elem *e, bool negative_sign_right) {
             if (str == NULL) {
                 rerror("Out of memory!");
             }
-            sprintf(str, "box(%s)", etostr(e->data.boxed));
+            sprintf(str, "box(%s)", etostra(e->data.boxed, negative_sign_right));
             return str;
         }
         case TYPE: {
@@ -132,9 +133,10 @@ char *etostra(elem *e, bool negative_sign_right) {
                 if (num == '\n') {
                     return "↪";
                 }
-                char *str = malloc(2);
+                char *str = malloc(3);
                 str[0] = '@';
                 str[1] = (char) num;
+                str[2] = '\0';
                 return str;
             }
 
@@ -142,31 +144,32 @@ char *etostra(elem *e, bool negative_sign_right) {
         }
         case ARRAY: {
             // first, calculate the length of the string
-            size_t len = 2; // [[
+            size_t len = 1; // [
             size_t rlen = e->data.array.len;
             bool is_all_chars = (rlen > 0);
             for (size_t i = 0; i < rlen; i++) {
                 elem *x = e->data.array.data[i];
+                len += strlen(etostra(x, negative_sign_right));
+                len += 1; // space
                 if (x->f_char) {
                     continue;
                 }
                 is_all_chars = false;
-                len += strlen(etostr(x));
-                len += 1; // space
             }
             if (rlen > 0) {
                 len--; // no space after last element
             }
-            len += 2; // ]]
+            len += 1; // ]\0
 
             if (is_all_chars) {
-                char *str = malloc(rlen + 3);
+                char *str = malloc(rlen+3);
 
                 // copy the string
                 str[0] = '"';
                 size_t i = 0;
                 for (; i < rlen; i++) {
-                    str[i + 1] = (char) e->data.array.data[i]->data.number;
+                    char c = (char) e->data.array.data[i]->data.number;
+                    str[i + 1] = c;
                 }
                 str[i + 1] = '"';
                 str[i + 2] = '\0';
@@ -176,6 +179,7 @@ char *etostra(elem *e, bool negative_sign_right) {
 
             // allocate the string
             char *str = malloc(len);
+            str[0] = '\0';
             if (str == NULL) {
                 rerror("Out of memory!");
             }
@@ -183,7 +187,7 @@ char *etostra(elem *e, bool negative_sign_right) {
             // copy the string
             strcpy(str, "[");
             for (size_t i = 0; i < e->data.array.len; i++) {
-                strcat(str, etostr(e->data.array.data[i]));
+                strcat(str, etostra(e->data.array.data[i], negative_sign_right));
                 if (i < e->data.array.len - 1) {
                     strcat(str, " ");
                 }

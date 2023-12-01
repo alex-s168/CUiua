@@ -192,8 +192,7 @@ elem *e_from_bool(bool b) {
 }
 
 elem *e_from_char(char c) {
-    elem *e = new_elem(NUMBER);
-    e->data.number = c;
+    elem *e = e_from_num(c);
     e->f_char = true;
     return e;
 }
