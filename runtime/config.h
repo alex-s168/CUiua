@@ -11,7 +11,7 @@
 /* reduces system time by not freeing elements during calculations.
  * This will increase memory usage.
  */
-// #define FAST_FREE
+#define FAST_FREE
 
 /* prints debug information when an element is freed via freexe */
 // #define FREEXE_LOG
