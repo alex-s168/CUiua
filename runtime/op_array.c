@@ -32,9 +32,6 @@ void find_pattern(stack *s) {
         rerror("The second argument to find_pattern needs to be an array!");
     }
     arr array_arr = e_as_arr(array);
-    if (array_arr.len == 0) {
-        rerror("The second argument to find_pattern needs to be a non-empty array!");
-    }
 
     iarr indecies;
     iarr_init(&indecies, 0);
