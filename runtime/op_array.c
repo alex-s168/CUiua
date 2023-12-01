@@ -1411,11 +1411,14 @@ void fragment(stack *s) {
     int nend = (int) e_as_num(end);
 
     if (nstart >= arr.len) {
-        rerror("Start index out of bounds!");
+        new_array(s);
+        end_array(s);
+        freexe(array);
+        return;
     }
 
     if (nend >= arr.len) {
-        rerror("End index out of bounds!");
+        nend = arr.len - 1;
     }
 
     if (nstart > nend) {
