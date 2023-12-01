@@ -500,6 +500,10 @@ size_t compile(char *code, size_t len, FILE *main, FILE *top) {
             fprintf(main, "  find_pattern(s);\n");
             continue;
         }
+        UC(curr, "◞") {
+            fprintf(main, "  insert(s);\n");
+            continue;
+        }
         UC(curr, "λ") { // anonymous function of one operator
             FILE *f = tmpfile();
 

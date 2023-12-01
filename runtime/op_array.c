@@ -1502,3 +1502,55 @@ void count_until_false(stack *s) {
 
     free_elem(ae);
 }
+
+// inserts an element into an array at a specific index
+// first arg: index (number)
+// second arg: element to insert
+// third arg: array to insert into
+// example:
+//   [1 3 4 5] 1 2 insert  ->  [1 2 3 4 5]
+void insert(stack *s) {
+    elem *e = pop_f(s);
+
+    elem *index_e = pop_f(s);
+    if (!is_positive_index(index_e)) {
+        rerror("Expected positive integer, got %s!", type_to_str(index_e->type));
+    }
+    size_t index = (size_t) e_as_num(index_e);
+
+    elem *array_e = pop_f(s);
+    if (!is_array(array_e)) {
+        rerror("Expected array, got %s!", type_to_str(array_e->type));
+    }
+    arr array = e_as_arr(array_e);
+
+    if (index > array.len) {
+        new_array(s);
+        for (size_t i = 0; i < array.len; i++) {
+            push(s, array.data[i]);
+        }
+        push(s, e);
+        end_array(s);
+        freexe(index_e);
+        return;
+    }
+
+    arr new_array;
+    new_array.len = array.len + 1;
+    new_array.data = malloc(sizeof(elem *) * new_array.len);
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+
+    for (size_t i = 0; i < index; i++) {
+        new_array.data[i] = array.data[i];
+    }
+    new_array.data[index] = e;
+    for (size_t i = index; i < array.len; i++) {
+        new_array.data[i + 1] = array.data[i];
+    }
+
+    push_array(s, new_array);
+
+    freexe(index_e);
+}

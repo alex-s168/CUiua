@@ -32,6 +32,10 @@ size_t cleanup_list_alloc = 8;
 stack array_builder_stack;
 
 void add_for_cleanup(void *e) {
+#ifdef NO_MM
+    return;
+#endif
+
     if (cleanup_list_len >= cleanup_list_alloc) {
         cleanup_list_alloc *= 2;
         cleanup_list = realloc(cleanup_list, cleanup_list_alloc * sizeof(void *));
@@ -44,6 +48,10 @@ void add_for_cleanup(void *e) {
 
 // marks an element as unused
 void unused(elem *e) {
+#ifdef NO_MM
+    return;
+#endif
+
     if (e == NULL) {
         return;
     }
@@ -54,6 +62,10 @@ void unused(elem *e) {
 }
 
 void cleanup() {
+#ifdef NO_MM
+    return;
+#endif
+
     size_t j = 0;
     for (size_t i = 0; i < cleanup_list_len; i++) {
         __builtin_prefetch(cleanup_list + i);
@@ -85,6 +97,10 @@ void cleanup() {
 // frees a pointer
 // if it is in the cleanup list it will be removed
 void freex(void *e) {
+#ifdef NO_MM
+    return;
+#endif
+
     if (e == NULL) {
         return;
     }
@@ -104,6 +120,10 @@ void freex(void *e) {
 // frees an element
 // if it is in the cleanup list it will be removed
 void freexe(elem *e) {
+#ifdef NO_MM
+    return;
+#endif
+
     if (e == NULL) {
         return;
     }
@@ -135,10 +155,12 @@ void initrt() {
 
     srand(time(NULL));
 
+#ifndef NO_MM
     cleanup_list = malloc(cleanup_list_alloc * sizeof(void *));
     if (cleanup_list == NULL) {
         rerror("Out of memory!");
     }
+#endif
 
     shutdown_funs = malloc(shutdown_funs_alloc * sizeof(vfun));
     if (shutdown_funs == NULL) {

@@ -31,6 +31,14 @@ void match(stack *s);
 // joins two arrays end-to-end
 void join(stack *s);
 
+// inserts an element into an array at a specific index
+// first arg: index (number)
+// second arg: element to insert
+// third arg: array to insert into
+// example:
+//   [1 3 4 5] 1 2 insert  ->  [1 2 3 4 5]
+void insert(stack *s);
+
 // select elements from an array
 // (the first element on the stack is a array of indecies)
 // (the second element on the stack is the array to select from)
