@@ -75,6 +75,13 @@ void cleanup();
 // if it is in the cleanup list it will be removed
 void freex(void *e);
 
+// frees an element
+// if it is in the cleanup list it will be removed
+void freexe(elem *e);
+
+// safely gets an element from an array
+elem *arr_get(elem *a, size_t index);
+
 // initializes the runtime
 void initrt();
 

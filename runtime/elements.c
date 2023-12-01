@@ -26,17 +26,25 @@ elem *new_elem(elem_type type) {
 
 // assumes that every array uses one single memory allocation for all the elements and itself.
 // This allocation is starting at array.data
+__always_inline
 void free_elem(elem *e) {
-    if (e == NULL) {
-        return;
+    freexe(e);
+}
+
+// safely gets an element from an array
+elem *arr_get(elem *a, size_t index) {
+    arr array = a->data.array;
+    if (index >= array.len) {
+        rerror("Array index out of bounds: %d >= %d", index, array.len);
     }
-    if (e->type == BOXED) {
-        free_elem(e->data.boxed);
+    elem *x = array.data[index];
+    if (x == NULL) {
+        rerror("Array element is null");
     }
-    if (!e->is_alloc) {
-        return;
+    if (a->is_alloc) {
+        return eclone(x);
     }
-    freex(e);
+    return x;
 }
 
 bool elems_equal(elem *a, elem *b) {

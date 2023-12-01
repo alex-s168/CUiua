@@ -65,7 +65,7 @@ void find_pattern(stack *s) {
         e->data.number = indecies.data[i];
         new_array.data[i] = e;
     }
-    freex(indecies.data);
+    iarr_free(indecies);
     free_elem(pattern);
     free_elem(array);
     elem *e = new_elem(ARRAY);
@@ -102,15 +102,19 @@ void take(stack *s) {
 // removes the first n elements from an array
 void drop(stack *s) {
     elem *n = pop(s);
-    if (n->type != NUMBER || round(n->data.number) != n->data.number || n->data.number < 0) {
+    if (!is_numeric(n)) {
         rerror("The first argument to drop needs to be a positive integer!");
     }
-    size_t n_int = (size_t) n->data.number;
+    double n_doub = e_as_num(n);
+    if (round(n_doub) != n_doub || n_doub < 0) {
+        rerror("The first argument to drop needs to be a positive integer!");
+    }
+    size_t n_int = (size_t) n_doub;
     elem *a = pop(s);
-    if (a->type != ARRAY) {
+    if (!is_array(a)) {
         rerror("The second argument to drop needs to be an array!");
     }
-    arr array = a->data.array;
+    arr array = e_as_arr(a);
     if (n->data.number > array.len) {
         rerror("Amount bigger than array length!");
     }
@@ -123,9 +127,9 @@ void drop(stack *s) {
     for (size_t i = 0; i < new_array.len; i++) {
         new_array.data[i] = array.data[i + n_int];
     }
-    freex(array.data);
     a->data.array = new_array;
     push(s, a);
+    free_elem(a);
     free_elem(n);
 }
 
@@ -150,7 +154,7 @@ void rot(stack *s) {
     for (size_t i = 0; i < new_array.len; i++) {
         new_array.data[i] = array.data[(i + n_int) % array.len];
     }
-    freex(array.data);
+    freexe(a);
     a->data.array = new_array;
     push(s, a);
     free_elem(n);
@@ -220,7 +224,7 @@ static arr deshape_rec(arr a) {
             new_array.data[new_array.len - 1] = a.data[i];
         }
     }
-    //freex(a.data);
+    // TODO: free a
     return new_array;
 }
 
@@ -271,8 +275,8 @@ void join(stack *s) {
         for (size_t i = 0; i < array_b.len; i++) {
             new_array.data[array_a.len + i] = array_b.data[i];
         }
-        freex(array_a.data);
-        freex(array_b.data);
+        freexe(a);
+        freexe(b);
         a->data.array = new_array;
         push(s, a);
     } else if (a->type == ARRAY && b->type != ARRAY) {
@@ -287,7 +291,7 @@ void join(stack *s) {
             new_array.data[i] = array_a.data[i];
         }
         new_array.data[array_a.len] = eclone(b);
-        freex(array_a.data);
+        freexe(a);
         a->data.array = new_array;
         push(s, a);
     } else if (a->type != ARRAY && b->type == ARRAY) {
@@ -302,7 +306,7 @@ void join(stack *s) {
         for (size_t i = 0; i < array_b.len; i++) {
             new_array.data[i + 1] = array_b.data[i];
         }
-        freex(array_b.data);
+        freexe(b);
         b->data.array = new_array;
         push(s, b);
     } else {
@@ -351,8 +355,11 @@ void select_op(stack *s) {
         }
         new_array.data[i] = eclone(array.data[index]);
     }
-    freex(array.data);
+    if (!a->is_alloc) {
+        freex(array.data);
+    }
     a->data.array = new_array;
+    a->is_alloc = false;
     free_elem(b);
     push(s, a);
 }
@@ -372,10 +379,9 @@ void pick(stack *s) {
     if (index >= array.len) {
         rerror("Index out of bounds!");
     }
-    elem *e = array.data[index];
-    freex(array.data);
-    a->data.array = array;
-    free_elem(b);
+    elem *e = arr_get(a, index);
+    freexe(a);
+    freexe(b);
     push(s, e);
 }
 
@@ -533,7 +539,7 @@ void shape(stack *s) {
         new_array.data[i] = e;
     }
     freex(shape.data);
-    freex(array.data);
+    freexe(a);
     a->data.array = new_array;
     push(s, a);
 }
@@ -572,9 +578,9 @@ void each(stack *s) {
     __builtin_prefetch(array.data);
     funptr fun = e_as_funptr(f);
 
-    size_t off = sizeof(elem *) * array.len;
-    void *data = malloc(off + sizeof(elem) * (array.len+1));
-    elem *elema = (elem *) (data + off);
+    size_t off = sizeof(elem) * (array.len + 1);
+    elem *elema = malloc(off + sizeof(elem *) * array.len);
+    void *data = elema + array.len + 1;
 
     size_t i = 0;
     for (; i < array.len; i++) {
@@ -583,15 +589,16 @@ void each(stack *s) {
 
         // can't be pop_f because it might free the element (depends on the function)
         elem *x = pop_f(s);
-        elem *r = elema + i;
+        elem *r = elema + i + 1;
         eclone_into(r, x);
         ((elem **) data)[i] = r;
     }
 
-    elem *n = elema + i;
+    elem *n = elema;
     n->type = ARRAY;
     n->data.array.len = array.len;
     n->data.array.data = (elem **) data;
+    n->is_alloc = true;
 
     push(s, n);
     free_elem(f);
@@ -1248,7 +1255,7 @@ void scan(stack *s) {
                                 \
     end_array(s);               \
                                 \
-    freex(arr.data);            \
+    freexe(array);              \
                                 \
     iarr_free(split_arr);
 
@@ -1316,10 +1323,8 @@ void table(stack *s) {
 
     end_array(s);
 
-    freex(array_a.data);
-    freex(array_b.data);
-    freex(a);
-    freex(b);
+    freexe(a);
+    freexe(b);
 }
 
 // combines two arrays by grouping each element of one array into a pair with the corresponding element of the other array
@@ -1363,10 +1368,8 @@ void group(stack *s) {
 
     end_array(s);
 
-    freex(array_a.data);
-    freex(array_b.data);
-    freex(a);
-    freex(b);
+    freexe(a);
+    freexe(b);
 }
 
 // pushes all elements of an array onto the stack
@@ -1384,8 +1387,7 @@ void dearray(stack *s) {
         push(s, array.data[i]);
     }
 
-    freex(array.data);
-    freex(e);
+    freexe(e);
 }
 
 // removes a fragment from an array
@@ -1401,7 +1403,7 @@ void fragment(stack *s) {
         rerror("Expected positive integer, got %s!", type_to_str(start->type));
     }
 
-    elem *array = pop(s);
+    elem *array = pop_f(s);
     if (!is_array(array)) {
         rerror("Expected array, got %s!", type_to_str(array->type));
     }
@@ -1431,8 +1433,7 @@ void fragment(stack *s) {
     }
     end_array(s);
 
-    freex(arr.data);
-    freex(array);
+    freexe(array);
 }
 
 // rotates the shape of an array

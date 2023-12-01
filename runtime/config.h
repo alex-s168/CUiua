@@ -13,6 +13,9 @@
  */
 // #define FAST_FREE
 
+/* prints debug information when an element is freed via freexe */
+// #define FREEXE_LOG
+
 /* print cleanup debug information */
 // #define CLEANUP_DEBUG
 

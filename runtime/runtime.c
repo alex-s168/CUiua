@@ -101,6 +101,31 @@ void freex(void *e) {
 #endif
 }
 
+// frees an element
+// if it is in the cleanup list it will be removed
+void freexe(elem *e) {
+    if (e == NULL) {
+        return;
+    }
+#ifdef FREEXE_LOG
+    printf("freeing:\n  is_alloc: %d\n  type: %s\n", e->is_alloc, type_to_str(e->type));
+#endif
+
+    if (e->is_alloc) {
+        freex(e);
+    } else {
+        if (e->type == ARRAY) {
+            for (size_t i = 0; i < e->data.array.len; i++) {
+                freexe(e->data.array.data[i]);
+            }
+            freex(e->data.array.data);
+        } else if (e->type == BOXED) {
+            freexe(e->data.boxed);
+        }
+        freex(e);
+    }
+}
+
 vfun *shutdown_funs = NULL;
 size_t shutdown_funs_count = 0;
 size_t shutdown_funs_alloc = 8;

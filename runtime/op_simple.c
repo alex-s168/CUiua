@@ -39,7 +39,7 @@ void unbox(stack *s) {
     elem *unboxed = e->data.boxed;
     e->type = unboxed->type;
     e->data = unboxed->data;
-    freex(unboxed);
+    freexe(unboxed);
 }
 
 // debug prints the top element on the stack without popping it
