@@ -14,6 +14,65 @@
 #endif
 
 
+// similar to find but finds a continues pattern
+// example: [1 2 3 4 5 6] [2 3] find_pattern   ->   [1]
+// (1 is the index of the start of the pattern in the array)
+// finds all occurrences of the pattern
+void find_pattern(stack *s) {
+    elem *pattern = pop_f(s);
+    if (!is_array(pattern)) {
+        rerror("The first argument to find_pattern needs to be an array!");
+    }
+    arr pattern_arr = e_as_arr(pattern);
+    if (pattern_arr.len == 0) {
+        rerror("The first argument to find_pattern needs to be a non-empty array!");
+    }
+    elem *array = pop_f(s);
+    if (!is_array(array)) {
+        rerror("The second argument to find_pattern needs to be an array!");
+    }
+    arr array_arr = e_as_arr(array);
+    if (array_arr.len == 0) {
+        rerror("The second argument to find_pattern needs to be a non-empty array!");
+    }
+
+    iarr indecies;
+    iarr_init(&indecies, 0);
+
+    for (size_t i = 0; i < array_arr.len; i++) {
+        if (elems_equal(array_arr.data[i], pattern_arr.data[0])) {
+            bool found = true;
+            for (size_t j = 1; j < pattern_arr.len; j++) {
+                if (i + j >= array_arr.len || !elems_equal(array_arr.data[i + j], pattern_arr.data[j])) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                iarr_append(&indecies, i);
+            }
+        }
+    }
+
+    arr new_array;
+    new_array.len = indecies.len;
+    new_array.data = malloc(new_array.len * sizeof(elem *));
+    if (new_array.data == NULL) {
+        rerror("Out of memory!");
+    }
+    for (size_t i = 0; i < indecies.len; i++) {
+        elem *e = new_elem(NUMBER);
+        e->data.number = indecies.data[i];
+        new_array.data[i] = e;
+    }
+    freex(indecies.data);
+    free_elem(pattern);
+    free_elem(array);
+    elem *e = new_elem(ARRAY);
+    e->data.array = new_array;
+    push(s, e);
+}
+
 // ↙
 void take(stack *s) {
     elem *ne = pop_f(s);

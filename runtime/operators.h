@@ -328,4 +328,9 @@ void fork_op(stack *s);
 // modulos operator
 void mod_op(stack *s);
 
+// similar to find but finds a continues pattern
+// example: [1 2 3 4 5 6] [2 3] find_pattern   ->   [1]
+// (1 is the index of the start of the pattern in the array)
+void find_pattern(stack *s);
+
 #endif //CUIUA_RUNTIME_OPERATORS_H
