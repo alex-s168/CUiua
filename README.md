@@ -2,11 +2,13 @@
 Stack based array programming language heavily inspired 
 by Uiua.
 
-You can find the documentation [here](https://supercraftalex.github.io/CUiua-doc/).
+**THIS RUNTIME AND TRANSPILER WILL BE REPLACED SOON BY A COMPLETLY CUSTOM OPTIMIZED COMPILER**
 
-Recommended font: [DejaVu Sans Mono for CUiua](https://github.com/SuperCraftAlex/DejaVu-for-CUiua)
+You can find the (unfinished) documentation [here](https://alex-s168.github.io/CUiua-doc/).
 
-The CUiua [formatter](https://github.com/SuperCraftAlex/CUiua-Formatter) is highly recommended
+Recommended font: [DejaVu Sans Mono for CUiua](https://github.com/alex-s168/DejaVu-for-CUiua)
+
+The CUiua [formatter](https://github.com/alex-s168/CUiua-Formatter) is highly recommended
 
 ## Example code
 ### Find the lowest number in an array
